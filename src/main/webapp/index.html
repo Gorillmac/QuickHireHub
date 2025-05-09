@@ -874,6 +874,11 @@
         </div>
     </footer>
 
+    <!-- Scroll to top button -->
+    <a href="#" class="scroll-top" id="scrollTop">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+
     <script>
         // Animated Counters for Stats
         document.addEventListener('DOMContentLoaded', () => {
@@ -923,6 +928,44 @@
             // Start immediately if already in viewport, otherwise on scroll
             startCountersWhenVisible();
             window.addEventListener('scroll', startCountersWhenVisible);
+            
+            // Scroll to top button functionality
+            const scrollButton = document.getElementById('scrollTop');
+            
+            const handleScroll = () => {
+                if (window.scrollY > 300) {
+                    scrollButton.classList.add('active');
+                } else {
+                    scrollButton.classList.remove('active');
+                }
+            };
+            
+            window.addEventListener('scroll', handleScroll);
+            
+            // Smooth scroll to top
+            scrollButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+            
+            // Animate feature cards when they come into view
+            const animateOnScroll = () => {
+                const featureCards = document.querySelectorAll('.feature-card');
+                
+                featureCards.forEach(card => {
+                    if (isInViewport(card) && !card.classList.contains('animated')) {
+                        card.classList.add('animated');
+                        card.style.opacity = '1';
+                    }
+                });
+            };
+            
+            // Check on initial load and scroll
+            animateOnScroll();
+            window.addEventListener('scroll', animateOnScroll);
         });
     </script>
 </body>
