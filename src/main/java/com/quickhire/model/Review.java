@@ -3,15 +3,16 @@ package com.quickhire.model;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Review entity class representing reviews between users
  */
 public class Review {
-    private int id;
-    private int reviewerId; // User who wrote the review
-    private int reviewedUserId; // User who received the review
-    private int jobId; // Associated job
+    private UUID id;
+    private UUID reviewerId; // User who wrote the review
+    private UUID reviewedUserId; // User who received the review
+    private UUID jobId; // Associated job
     private int rating; // 1-5 stars
     private String comment;
     private Timestamp createdAt;
@@ -21,10 +22,13 @@ public class Review {
     
     // Default constructor
     public Review() {
+        this.id = UUID.randomUUID();
+        this.createdAt = new Timestamp(System.currentTimeMillis());
     }
     
     // Constructor with essential fields
-    public Review(int reviewerId, int reviewedUserId, int jobId, int rating, String comment) {
+    public Review(UUID reviewerId, UUID reviewedUserId, UUID jobId, int rating, String comment) {
+        this();
         this.reviewerId = reviewerId;
         this.reviewedUserId = reviewedUserId;
         this.jobId = jobId;
@@ -33,7 +37,7 @@ public class Review {
     }
     
     // Full constructor
-    public Review(int id, int reviewerId, int reviewedUserId, int jobId, 
+    public Review(UUID id, UUID reviewerId, UUID reviewedUserId, UUID jobId, 
             int rating, String comment, Timestamp createdAt) {
         this.id = id;
         this.reviewerId = reviewerId;
@@ -45,35 +49,35 @@ public class Review {
     }
     
     // Getters and setters
-    public int getId() {
+    public UUID getId() {
         return id;
     }
     
-    public void setId(int id) {
+    public void setId(UUID id) {
         this.id = id;
     }
     
-    public int getReviewerId() {
+    public UUID getReviewerId() {
         return reviewerId;
     }
     
-    public void setReviewerId(int reviewerId) {
+    public void setReviewerId(UUID reviewerId) {
         this.reviewerId = reviewerId;
     }
     
-    public int getReviewedUserId() {
+    public UUID getReviewedUserId() {
         return reviewedUserId;
     }
     
-    public void setReviewedUserId(int reviewedUserId) {
+    public void setReviewedUserId(UUID reviewedUserId) {
         this.reviewedUserId = reviewedUserId;
     }
     
-    public int getJobId() {
+    public UUID getJobId() {
         return jobId;
     }
     
-    public void setJobId(int jobId) {
+    public void setJobId(UUID jobId) {
         this.jobId = jobId;
     }
     

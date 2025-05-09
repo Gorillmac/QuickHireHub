@@ -2,7 +2,7 @@
 
 -- Users table
 CREATE TABLE IF NOT EXISTS users (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
@@ -22,8 +22,8 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- Jobs table
 CREATE TABLE IF NOT EXISTS jobs (
-    id SERIAL PRIMARY KEY,
-    company_id INTEGER NOT NULL REFERENCES users(id),
+    id UUID PRIMARY KEY,
+    company_id UUID NOT NULL REFERENCES users(id),
     title VARCHAR(100) NOT NULL,
     description TEXT NOT NULL,
     requirements TEXT,
@@ -40,9 +40,9 @@ CREATE TABLE IF NOT EXISTS jobs (
 
 -- Applications table
 CREATE TABLE IF NOT EXISTS applications (
-    id SERIAL PRIMARY KEY,
-    job_id INTEGER NOT NULL REFERENCES jobs(id),
-    freelancer_id INTEGER NOT NULL REFERENCES users(id),
+    id UUID PRIMARY KEY,
+    job_id UUID NOT NULL REFERENCES jobs(id),
+    freelancer_id UUID NOT NULL REFERENCES users(id),
     cover_letter TEXT NOT NULL,
     proposed_rate DECIMAL(10, 2) NOT NULL,
     estimated_duration INTEGER NOT NULL,
@@ -54,10 +54,10 @@ CREATE TABLE IF NOT EXISTS applications (
 
 -- Messages table
 CREATE TABLE IF NOT EXISTS messages (
-    id SERIAL PRIMARY KEY,
-    sender_id INTEGER NOT NULL REFERENCES users(id),
-    receiver_id INTEGER NOT NULL REFERENCES users(id),
-    job_id INTEGER REFERENCES jobs(id),
+    id UUID PRIMARY KEY,
+    sender_id UUID NOT NULL REFERENCES users(id),
+    receiver_id UUID NOT NULL REFERENCES users(id),
+    job_id UUID REFERENCES jobs(id),
     content TEXT NOT NULL,
     read BOOLEAN NOT NULL DEFAULT FALSE,
     sent_at TIMESTAMP NOT NULL DEFAULT NOW()
@@ -65,10 +65,10 @@ CREATE TABLE IF NOT EXISTS messages (
 
 -- Reviews table
 CREATE TABLE IF NOT EXISTS reviews (
-    id SERIAL PRIMARY KEY,
-    reviewer_id INTEGER NOT NULL REFERENCES users(id),
-    reviewed_user_id INTEGER NOT NULL REFERENCES users(id),
-    job_id INTEGER NOT NULL REFERENCES jobs(id),
+    id UUID PRIMARY KEY,
+    reviewer_id UUID NOT NULL REFERENCES users(id),
+    reviewed_user_id UUID NOT NULL REFERENCES users(id),
+    job_id UUID NOT NULL REFERENCES jobs(id),
     rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
     comment TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -77,21 +77,23 @@ CREATE TABLE IF NOT EXISTS reviews (
 
 -- Reports table (for abuse/scam reporting)
 CREATE TABLE IF NOT EXISTS reports (
-    id SERIAL PRIMARY KEY,
-    reporter_id INTEGER NOT NULL REFERENCES users(id),
-    reported_user_id INTEGER NOT NULL REFERENCES users(id),
+    id UUID PRIMARY KEY,
+    reporter_id UUID NOT NULL REFERENCES users(id),
+    reported_user_id UUID NOT NULL REFERENCES users(id),
     reason VARCHAR(100) NOT NULL,
     description TEXT NOT NULL,
     status VARCHAR(20) NOT NULL,
     admin_notes TEXT,
-    admin_id INTEGER REFERENCES users(id),
+    admin_id UUID REFERENCES users(id),
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     resolved_at TIMESTAMP
 );
 
 -- Create admin user if it doesn't exist
-INSERT INTO users (username, email, password_hash, salt, role, full_name, created_at, updated_at)
-SELECT 'admin', 'admin@quickhire.com', 
+INSERT INTO users (id, username, email, password_hash, salt, role, full_name, created_at, updated_at)
+SELECT 
+       '12345678-1234-1234-1234-123456789012'::UUID, -- Fixed UUID for admin
+       'admin', 'admin@quickhire.com', 
        '5f4dcc3b5aa765d61d8327deb882cf99', -- 'password' (for demo purposes only)
        'salt123', 'ADMIN', 'System Administrator', NOW(), NOW()
 WHERE NOT EXISTS (
