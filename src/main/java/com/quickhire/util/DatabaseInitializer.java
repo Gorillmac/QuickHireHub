@@ -75,10 +75,7 @@ public class DatabaseInitializer {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    // Skip comments
-                    if (line.trim().startsWith("--")) {
-                        continue;
-                    }
+                    // We'll keep the comments for better debugging if errors occur
                     schema.append(line).append("\n");
                 }
             }

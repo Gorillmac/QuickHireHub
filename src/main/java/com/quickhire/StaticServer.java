@@ -24,6 +24,18 @@ public class StaticServer {
     public static void main(String[] args) throws Exception {
         System.out.println("Initializing QuickHire static file server...");
         
+        // Initialize the database schema
+        System.out.println("Initializing database schema...");
+        try {
+            DatabaseInitializer.initializeDatabase();
+            System.out.println("Database schema initialized successfully.");
+        } catch (Exception e) {
+            System.err.println("Error initializing database schema: " + e.getMessage());
+            e.printStackTrace();
+            // Continue execution - we don't want to fail startup if database
+            // schema is already present or partially initialized
+        }
+        
         // Create a basic server
         Server server = new Server();
         
