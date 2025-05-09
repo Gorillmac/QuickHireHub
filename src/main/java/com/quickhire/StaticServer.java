@@ -14,6 +14,7 @@ import org.eclipse.jetty.util.resource.Resource;
 import com.quickhire.servlet.LoginServlet;
 import com.quickhire.servlet.LogoutServlet;
 import com.quickhire.servlet.RegisterServlet;
+import com.quickhire.util.DatabaseInitializer;
 import jakarta.servlet.DispatcherType;
 
 /**
