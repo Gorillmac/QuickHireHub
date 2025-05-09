@@ -1,3 +1,4 @@
+com/quickhire/SimpleServer.class
 com/quickhire/controller/ReviewServlet.class
 com/quickhire/controller/AdminServlet.class
 com/quickhire/controller/MessageServlet.class

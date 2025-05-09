@@ -25,3 +25,4 @@
 /home/runner/workspace/src/main/java/com/quickhire/controller/ApplicationServlet.java
 /home/runner/workspace/src/main/java/com/quickhire/util/PasswordUtils.java
 /home/runner/workspace/src/main/java/com/quickhire/dao/ApplicationDAO.java
+/home/runner/workspace/src/main/java/com/quickhire/SimpleServer.java

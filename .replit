@@ -22,11 +22,11 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "mvn clean compile && java -cp target/classes:$(mvn dependency:build-classpath -Dmdep.outputFile=/dev/stdout -q) com.quickhire.JettyServer"
+args = "mvn clean compile && java -cp target/classes:$(mvn dependency:build-classpath -Dmdep.outputFile=/dev/stdout -q) com.quickhire.SimpleServer"
 waitForPort = 5000
 
 [deployment]
-run = ["sh", "-c", "mvn clean compile && java -cp target/classes:$(mvn dependency:build-classpath -Dmdep.outputFile=/dev/stdout -q) com.quickhire.JettyServer"]
+run = ["sh", "-c", "mvn clean compile && java -cp target/classes:$(mvn dependency:build-classpath -Dmdep.outputFile=/dev/stdout -q) com.quickhire.SimpleServer"]
 
 [[ports]]
 localPort = 5000
