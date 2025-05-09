@@ -22,11 +22,11 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "java -cp \"$(mvn dependency:build-classpath -Dmdep.outputFile=/dev/stdout -q):src/main/java\" com.quickhire.StaticServer"
+args = "java -cp \"$(mvn dependency:build-classpath -Dmdep.outputFile=/dev/stdout -q):target/classes\" com.quickhire.StaticServer"
 waitForPort = 5000
 
 [deployment]
-run = ["sh", "-c", "java -cp \"$(mvn dependency:build-classpath -Dmdep.outputFile=/dev/stdout -q):src/main/java\" com.quickhire.StaticServer"]
+run = ["sh", "-c", "java -cp \"$(mvn dependency:build-classpath -Dmdep.outputFile=/dev/stdout -q):target/classes\" com.quickhire.StaticServer"]
 
 [[ports]]
 localPort = 5000
