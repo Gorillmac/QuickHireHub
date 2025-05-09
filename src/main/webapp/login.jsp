@@ -4,15 +4,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - QuickHire</title>
+    <title>Log In - QuickHire</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
             --primary: #4361ee;
             --primary-dark: #3a56d4;
+            --secondary: #4cc9f0;
+            --accent: #f72585;
             --light: #f8f9fa;
             --dark: #212529;
             --gray: #6c757d;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --danger: #f44336;
             --border-radius: 8px;
             --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             --transition: all 0.3s ease;
@@ -28,23 +33,23 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
             color: var(--dark);
-            background-color: #f8f9fa;
+            background-color: #f0f2f5;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
         
         .container {
-            width: 90%;
-            max-width: 1200px;
+            width: 95%;
+            max-width: 1400px;
             margin: 0 auto;
+            padding: 0 15px;
         }
         
-        /* Header Styles */
+        /* Header */
         header {
             background-color: white;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            width: 100%;
         }
         
         .header-container {
@@ -55,7 +60,7 @@
         }
         
         .logo {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: 700;
             color: var(--primary);
             text-decoration: none;
@@ -67,35 +72,60 @@
             margin-right: 0.5rem;
         }
         
-        .auth-form-container {
-            flex: 1;
+        .nav-links {
             display: flex;
-            justify-content: center;
             align-items: center;
-            padding: 4rem 1rem;
         }
         
-        .auth-form {
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            transition: var(--transition);
+            border-radius: var(--border-radius);
+        }
+        
+        .nav-links a:hover {
+            background-color: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+        }
+        
+        .nav-links a.active {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        /* Login Form */
+        .login-section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 0;
+        }
+        
+        .login-container {
+            width: 100%;
+            max-width: 400px;
             background-color: white;
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
-            width: 100%;
-            max-width: 450px;
-            padding: 2.5rem;
+            padding: 2rem;
         }
         
-        .auth-form-header {
+        .login-header {
             text-align: center;
             margin-bottom: 2rem;
         }
         
-        .auth-form-header h2 {
+        .login-header h1 {
             font-size: 2rem;
-            color: var(--dark);
-            margin-bottom: 1rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
         }
         
-        .auth-form-header p {
+        .login-header p {
             color: var(--gray);
         }
         
@@ -105,24 +135,23 @@
         
         .form-group label {
             display: block;
-            font-weight: 600;
             margin-bottom: 0.5rem;
-            color: var(--dark);
+            font-weight: 500;
         }
         
         .form-control {
             width: 100%;
-            padding: 0.8rem 1rem;
+            padding: 0.75rem 1rem;
             font-size: 1rem;
-            border: 1px solid #ced4da;
+            border: 1px solid #ddd;
             border-radius: var(--border-radius);
             transition: var(--transition);
         }
         
         .form-control:focus {
-            border-color: var(--primary);
             outline: none;
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
         }
         
         .form-check {
@@ -133,107 +162,122 @@
         
         .form-check-input {
             margin-right: 0.5rem;
-            width: 18px;
-            height: 18px;
-        }
-        
-        .form-check-label {
-            color: var(--gray);
-        }
-        
-        .btn {
-            display: inline-block;
-            padding: 0.8rem 1.5rem;
-            border-radius: var(--border-radius);
-            font-weight: 600;
-            text-decoration: none;
-            text-align: center;
-            cursor: pointer;
-            transition: var(--transition);
-            border: none;
-            font-size: 1rem;
-            width: 100%;
-        }
-        
-        .btn-primary {
-            background-color: var(--primary);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background-color: var(--primary-dark);
         }
         
         .forgot-password {
-            display: block;
-            text-align: center;
-            margin-top: 1.5rem;
             color: var(--primary);
             text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            float: right;
         }
         
         .forgot-password:hover {
             text-decoration: underline;
         }
         
-        .auth-form-footer {
-            text-align: center;
-            margin-top: 2rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid #dee2e6;
-            color: var(--gray);
-        }
-        
-        .auth-form-footer a {
-            color: var(--primary);
-            text-decoration: none;
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
             font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            font-size: 1rem;
         }
         
-        .auth-form-footer a:hover {
-            text-decoration: underline;
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            width: 100%;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .form-divider {
+            display: flex;
+            align-items: center;
+            margin: 1.5rem 0;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        .form-divider::before,
+        .form-divider::after {
+            content: '';
+            flex: 1;
+            border-top: 1px solid #eee;
+        }
+        
+        .form-divider span {
+            padding: 0 10px;
         }
         
         .social-login {
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 1rem;
-            margin-top: 1.5rem;
+            margin-bottom: 1.5rem;
         }
         
         .social-btn {
-            flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 0.8rem;
-            border-radius: var(--border-radius);
-            border: 1px solid #dee2e6;
-            color: var(--dark);
-            text-decoration: none;
-            transition: var(--transition);
+            gap: 0.5rem;
+            padding: 0.75rem;
             background-color: white;
-        }
-        
-        .social-btn i {
-            margin-right: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            text-decoration: none;
+            color: var(--dark);
+            transition: var(--transition);
+            cursor: pointer;
         }
         
         .social-btn:hover {
-            background-color: #f8f9fa;
+            background-color: rgba(67, 97, 238, 0.05);
+            border-color: var(--primary);
         }
         
-        .btn-google {
-            color: #ea4335;
+        .form-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--gray);
         }
         
-        .btn-facebook {
-            color: #3b5998;
+        .form-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
         }
         
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .error-message {
+            background-color: rgba(244, 67, 54, 0.1);
+            color: var(--danger);
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+        
+        /* Footer */
         footer {
-            background-color: var(--dark);
-            color: white;
-            padding: 1.5rem 0;
+            background-color: white;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            padding: 2rem 0;
             margin-top: auto;
         }
         
@@ -243,36 +287,55 @@
             align-items: center;
         }
         
-        .footer-content p {
-            color: #adb5bd;
-            font-size: 0.9rem;
-        }
-        
-        .footer-links {
+        .footer-logo {
             display: flex;
-            gap: 1.5rem;
+            align-items: center;
+            font-weight: 700;
+            color: var(--primary);
+            gap: 0.5rem;
         }
         
         .footer-links a {
-            color: #adb5bd;
+            color: var(--gray);
             text-decoration: none;
-            font-size: 0.9rem;
+            margin-left: 1.5rem;
             transition: var(--transition);
         }
         
         .footer-links a:hover {
-            color: white;
+            color: var(--primary);
         }
         
-        /* Responsive Design */
+        .footer-bottom {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #eee;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
         @media (max-width: 768px) {
-            .auth-form {
-                padding: 2rem 1.5rem;
-            }
-            
-            .footer-content {
+            .header-container, .footer-content {
                 flex-direction: column;
                 gap: 1rem;
+            }
+            
+            .nav-links, .footer-links {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .footer-links a {
+                margin: 0 0.75rem;
+            }
+            
+            .login-container {
+                padding: 1.5rem;
+            }
+            
+            .social-login {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -282,69 +345,95 @@
     <header>
         <div class="container header-container">
             <a href="index.jsp" class="logo"><i class="fas fa-bolt"></i> QuickHire</a>
+            
+            <div class="nav-links">
+                <a href="index.jsp">Home</a>
+                <a href="about-us.jsp">About Us</a>
+                <a href="contact.jsp">Contact</a>
+                <a href="login.jsp" class="active">Log In</a>
+                <a href="register.jsp">Sign Up</a>
+            </div>
         </div>
     </header>
     
     <!-- Login Form -->
-    <div class="auth-form-container">
-        <div class="auth-form">
-            <div class="auth-form-header">
-                <h2>Welcome Back</h2>
+    <section class="login-section">
+        <div class="login-container">
+            <div class="login-header">
+                <h1>Welcome Back</h1>
                 <p>Log in to access your QuickHire account</p>
             </div>
+            
+            <% if (request.getAttribute("error") != null) { %>
+                <div class="error-message">
+                    <%= request.getAttribute("error") %>
+                </div>
+            <% } %>
             
             <form action="login" method="post">
                 <div class="form-group">
                     <label for="email">Email Address</label>
-                    <input type="email" id="email" name="email" class="form-control" placeholder="Enter your email" required>
+                    <input type="email" id="email" name="email" class="form-control" value="${email != null ? email : ''}" required>
                 </div>
                 
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" required>
+                    <input type="password" id="password" name="password" class="form-control" required>
+                    <a href="forgot-password.jsp" class="forgot-password">Forgot Password?</a>
                 </div>
                 
                 <div class="form-check">
-                    <input type="checkbox" id="remember" name="remember" class="form-check-input">
-                    <label for="remember" class="form-check-label">Remember me</label>
+                    <input type="checkbox" id="rememberMe" name="rememberMe" class="form-check-input">
+                    <label for="rememberMe">Remember me</label>
                 </div>
                 
                 <button type="submit" class="btn btn-primary">Log In</button>
                 
-                <a href="#" class="forgot-password">Forgot your password?</a>
-            </form>
-            
-            <div class="auth-form-footer">
-                <p>Or log in with:</p>
+                <div class="form-divider">
+                    <span>Or log in with</span>
+                </div>
+                
                 <div class="social-login">
-                    <a href="#" class="social-btn btn-google">
-                        <i class="fab fa-google"></i> Google
+                    <a href="#" class="social-btn">
+                        <i class="fab fa-google"></i>
+                        <span>Google</span>
                     </a>
-                    <a href="#" class="social-btn btn-facebook">
-                        <i class="fab fa-facebook-f"></i> Facebook
+                    
+                    <a href="#" class="social-btn">
+                        <i class="fab fa-facebook-f"></i>
+                        <span>Facebook</span>
                     </a>
                 </div>
                 
-                <p style="margin-top: 2rem;">Don't have an account? <a href="register.jsp">Sign Up</a></p>
-            </div>
+                <div class="form-footer">
+                    <p>Don't have an account? <a href="register.jsp">Sign Up</a></p>
+                </div>
+            </form>
         </div>
-    </div>
+    </section>
     
     <!-- Footer -->
     <footer>
-        <div class="container footer-content">
-            <p>&copy; <%= new java.util.Date().getYear() + 1900 %> QuickHire Inc. All rights reserved.</p>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <i class="fas fa-bolt"></i>
+                    <span>QuickHire</span>
+                </div>
+                
+                <div class="footer-links">
+                    <a href="about-us.jsp">About Us</a>
+                    <a href="how-it-works.jsp">How It Works</a>
+                    <a href="terms.jsp">Terms</a>
+                    <a href="privacy.jsp">Privacy</a>
+                    <a href="contact.jsp">Contact</a>
+                </div>
+            </div>
             
-            <div class="footer-links">
-                <a href="#">Privacy Policy</a>
-                <a href="#">Terms of Service</a>
-                <a href="#">Help Center</a>
+            <div class="footer-bottom">
+                <p>&copy; 2025 QuickHire Inc. All rights reserved.</p>
             </div>
         </div>
     </footer>
-    
-    <script>
-        console.log("QuickHire login page loaded successfully");
-    </script>
 </body>
 </html>

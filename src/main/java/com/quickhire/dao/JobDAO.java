@@ -1,430 +1,334 @@
 package com.quickhire.dao;
 
+import com.quickhire.model.Job;
+import com.quickhire.util.DatabaseUtil;
+
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.quickhire.model.Job;
-import com.quickhire.util.DatabaseUtil;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Data Access Object for Job entities
  */
 public class JobDAO {
     
+    private static final Logger logger = Logger.getLogger(JobDAO.class.getName());
+    
     /**
      * Create a new job in the database
+     * 
      * @param job The job to create
-     * @return The created job with ID populated
-     * @throws SQLException If a database error occurs
+     * @return true if the creation was successful, false otherwise
      */
-    public Job create(Job job) throws SQLException {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
+    public boolean create(Job job) {
+        String sql = "INSERT INTO jobs (id, company_id, title, description, category, requirements, " +
+                    "budget, payment_type, duration, status, posted_at, updated_at) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
         
-        try {
-            conn = DatabaseUtil.getConnection();
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
-            String sql = "INSERT INTO jobs (company_id, title, description, requirements, " +
-                    "location, budget, payment_type, duration, category, skills, status, " +
-                    "posted_at, updated_at, expires_at, approved) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), ?, ?)";
+            pstmt.setObject(1, job.getId());
+            pstmt.setObject(2, job.getClientId());
+            pstmt.setString(3, job.getTitle());
+            pstmt.setString(4, job.getDescription());
+            pstmt.setString(5, job.getCategory());
+            pstmt.setString(6, job.getSkills());
+            pstmt.setBigDecimal(7, job.getBudget());
+            pstmt.setString(8, job.getBudgetType());
+            pstmt.setString(9, job.getDuration());
+            pstmt.setString(10, job.getStatus());
             
-            ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            ps.setInt(1, job.getCompanyId());
-            ps.setString(2, job.getTitle());
-            ps.setString(3, job.getDescription());
-            ps.setString(4, job.getRequirements());
-            ps.setString(5, job.getLocation());
-            ps.setBigDecimal(6, job.getBudget());
-            ps.setString(7, job.getPaymentType());
-            ps.setString(8, job.getDuration());
-            ps.setString(9, job.getCategory());
-            ps.setString(10, job.getSkills());
-            ps.setString(11, job.getStatus());
-            ps.setTimestamp(12, job.getExpiresAt());
-            ps.setBoolean(13, job.isApproved());
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
             
-            int affectedRows = ps.executeUpdate();
-            if (affectedRows == 0) {
-                throw new SQLException("Creating job failed, no rows affected.");
-            }
-            
-            rs = ps.getGeneratedKeys();
-            if (rs.next()) {
-                job.setId(rs.getInt(1));
-            } else {
-                throw new SQLException("Creating job failed, no ID obtained.");
-            }
-            
-            return job;
-        } finally {
-            if (rs != null) try { rs.close(); } catch (SQLException e) { /* ignored */ }
-            if (ps != null) try { ps.close(); } catch (SQLException e) { /* ignored */ }
-            if (conn != null) DatabaseUtil.closeConnection(conn);
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error creating job", e);
+            return false;
         }
     }
     
     /**
-     * Get a job by ID
-     * @param id The job ID
-     * @return The job or null if not found
-     * @throws SQLException If a database error occurs
+     * Find a job by its ID
+     * 
+     * @param id The job ID to search for
+     * @return An Optional containing the job if found, empty otherwise
      */
-    public Job findById(int id) throws SQLException {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
+    public Optional<Job> findById(UUID id) {
+        String sql = "SELECT * FROM jobs WHERE id = ?";
         
-        try {
-            conn = DatabaseUtil.getConnection();
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
-            String sql = "SELECT * FROM jobs WHERE id = ?";
-            
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, id);
-            
-            rs = ps.executeQuery();
+            pstmt.setObject(1, id);
+            ResultSet rs = pstmt.executeQuery();
             
             if (rs.next()) {
-                return extractJobFromResultSet(rs);
+                Job job = mapResultSetToJob(rs);
+                return Optional.of(job);
             }
             
-            return null;
-        } finally {
-            if (rs != null) try { rs.close(); } catch (SQLException e) { /* ignored */ }
-            if (ps != null) try { ps.close(); } catch (SQLException e) { /* ignored */ }
-            if (conn != null) DatabaseUtil.closeConnection(conn);
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error finding job by ID", e);
         }
+        
+        return Optional.empty();
     }
     
     /**
-     * Get all jobs
-     * @return List of all jobs
-     * @throws SQLException If a database error occurs
+     * Get all jobs with a specific status
+     * 
+     * @param status The status to filter by ('open', 'in_progress', etc.)
+     * @return A list of jobs with the specified status
      */
-    public List<Job> findAll() throws SQLException {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
+    public List<Job> findByStatus(String status) {
+        String sql = "SELECT * FROM jobs WHERE status = ? ORDER BY posted_at DESC";
+        List<Job> jobs = new ArrayList<>();
         
-        try {
-            conn = DatabaseUtil.getConnection();
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
-            String sql = "SELECT * FROM jobs ORDER BY posted_at DESC";
+            pstmt.setString(1, status);
+            ResultSet rs = pstmt.executeQuery();
             
-            ps = conn.prepareStatement(sql);
-            
-            rs = ps.executeQuery();
-            
-            List<Job> jobs = new ArrayList<>();
             while (rs.next()) {
-                jobs.add(extractJobFromResultSet(rs));
+                Job job = mapResultSetToJob(rs);
+                jobs.add(job);
             }
             
-            return jobs;
-        } finally {
-            if (rs != null) try { rs.close(); } catch (SQLException e) { /* ignored */ }
-            if (ps != null) try { ps.close(); } catch (SQLException e) { /* ignored */ }
-            if (conn != null) DatabaseUtil.closeConnection(conn);
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error finding jobs by status", e);
         }
+        
+        return jobs;
     }
     
     /**
-     * Get all open jobs
-     * @return List of all open jobs
-     * @throws SQLException If a database error occurs
+     * Get all jobs posted by a specific client
+     * 
+     * @param clientId The ID of the client
+     * @return A list of jobs posted by the client
      */
-    public List<Job> findAllOpen() throws SQLException {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
+    public List<Job> findByClientId(UUID clientId) {
+        String sql = "SELECT * FROM jobs WHERE company_id = ? ORDER BY posted_at DESC";
+        List<Job> jobs = new ArrayList<>();
         
-        try {
-            conn = DatabaseUtil.getConnection();
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
-            String sql = "SELECT * FROM jobs WHERE status = ? AND approved = true ORDER BY posted_at DESC";
+            pstmt.setObject(1, clientId);
+            ResultSet rs = pstmt.executeQuery();
             
-            ps = conn.prepareStatement(sql);
-            ps.setString(1, Job.STATUS_OPEN);
-            
-            rs = ps.executeQuery();
-            
-            List<Job> jobs = new ArrayList<>();
             while (rs.next()) {
-                jobs.add(extractJobFromResultSet(rs));
+                Job job = mapResultSetToJob(rs);
+                jobs.add(job);
             }
             
-            return jobs;
-        } finally {
-            if (rs != null) try { rs.close(); } catch (SQLException e) { /* ignored */ }
-            if (ps != null) try { ps.close(); } catch (SQLException e) { /* ignored */ }
-            if (conn != null) DatabaseUtil.closeConnection(conn);
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error finding jobs by client ID", e);
         }
+        
+        return jobs;
     }
     
     /**
-     * Get jobs by company ID
-     * @param companyId The company ID
-     * @return List of jobs posted by the company
-     * @throws SQLException If a database error occurs
+     * Find all jobs in the system
+     * 
+     * @return A list of all jobs
      */
-    public List<Job> findByCompanyId(int companyId) throws SQLException {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
+    public List<Job> findAll() {
+        String sql = "SELECT * FROM jobs ORDER BY posted_at DESC";
+        List<Job> jobs = new ArrayList<>();
         
-        try {
-            conn = DatabaseUtil.getConnection();
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
             
-            String sql = "SELECT * FROM jobs WHERE company_id = ? ORDER BY posted_at DESC";
-            
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, companyId);
-            
-            rs = ps.executeQuery();
-            
-            List<Job> jobs = new ArrayList<>();
             while (rs.next()) {
-                jobs.add(extractJobFromResultSet(rs));
+                Job job = mapResultSetToJob(rs);
+                jobs.add(job);
             }
             
-            return jobs;
-        } finally {
-            if (rs != null) try { rs.close(); } catch (SQLException e) { /* ignored */ }
-            if (ps != null) try { ps.close(); } catch (SQLException e) { /* ignored */ }
-            if (conn != null) DatabaseUtil.closeConnection(conn);
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error finding all jobs", e);
         }
+        
+        return jobs;
     }
     
     /**
-     * Search for jobs by title, description, or skills
-     * @param query The search query
-     * @return List of matching jobs
-     * @throws SQLException If a database error occurs
+     * Find all jobs waiting for approval
+     * 
+     * @return A list of jobs that are pending approval
      */
-    public List<Job> search(String query) throws SQLException {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
+    public List<Job> findUnapproved() {
+        // Depending on your schema, this could be jobs with a status of "pending"
+        // or you might have a separate "approved" field
+        String sql = "SELECT * FROM jobs WHERE status = 'pending_approval' ORDER BY posted_at DESC";
+        List<Job> jobs = new ArrayList<>();
         
-        try {
-            conn = DatabaseUtil.getConnection();
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
             
-            String sql = "SELECT * FROM jobs WHERE (title LIKE ? OR description LIKE ? OR skills LIKE ?) " +
-                    "AND status = ? AND approved = true ORDER BY posted_at DESC";
-            
-            ps = conn.prepareStatement(sql);
-            String searchPattern = "%" + query + "%";
-            ps.setString(1, searchPattern);
-            ps.setString(2, searchPattern);
-            ps.setString(3, searchPattern);
-            ps.setString(4, Job.STATUS_OPEN);
-            
-            rs = ps.executeQuery();
-            
-            List<Job> jobs = new ArrayList<>();
             while (rs.next()) {
-                jobs.add(extractJobFromResultSet(rs));
+                Job job = mapResultSetToJob(rs);
+                jobs.add(job);
             }
             
-            return jobs;
-        } finally {
-            if (rs != null) try { rs.close(); } catch (SQLException e) { /* ignored */ }
-            if (ps != null) try { ps.close(); } catch (SQLException e) { /* ignored */ }
-            if (conn != null) DatabaseUtil.closeConnection(conn);
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error finding unapproved jobs", e);
         }
+        
+        return jobs;
     }
     
     /**
-     * Get unapproved jobs for admin moderation
-     * @return List of unapproved jobs
-     * @throws SQLException If a database error occurs
+     * Search for jobs by category, skills, or title
+     * 
+     * @param searchTerm The term to search for
+     * @return A list of jobs matching the search criteria
      */
-    public List<Job> findUnapproved() throws SQLException {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
+    public List<Job> search(String searchTerm) {
+        String sql = "SELECT * FROM jobs WHERE " +
+                     "category ILIKE ? OR " +
+                     "requirements ILIKE ? OR " +
+                     "title ILIKE ? " +
+                     "ORDER BY posted_at DESC";
+        List<Job> jobs = new ArrayList<>();
         
-        try {
-            conn = DatabaseUtil.getConnection();
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
-            String sql = "SELECT * FROM jobs WHERE approved = false ORDER BY posted_at ASC";
+            String term = "%" + searchTerm + "%";
+            pstmt.setString(1, term);
+            pstmt.setString(2, term);
+            pstmt.setString(3, term);
+            ResultSet rs = pstmt.executeQuery();
             
-            ps = conn.prepareStatement(sql);
-            
-            rs = ps.executeQuery();
-            
-            List<Job> jobs = new ArrayList<>();
             while (rs.next()) {
-                jobs.add(extractJobFromResultSet(rs));
+                Job job = mapResultSetToJob(rs);
+                jobs.add(job);
             }
             
-            return jobs;
-        } finally {
-            if (rs != null) try { rs.close(); } catch (SQLException e) { /* ignored */ }
-            if (ps != null) try { ps.close(); } catch (SQLException e) { /* ignored */ }
-            if (conn != null) DatabaseUtil.closeConnection(conn);
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error searching jobs", e);
+        }
+        
+        return jobs;
+    }
+    
+    /**
+     * Update an existing job in the database
+     * 
+     * @param job The job with updated information
+     * @return true if the update was successful, false otherwise
+     */
+    public boolean update(Job job) {
+        String sql = "UPDATE jobs SET title = ?, description = ?, category = ?, " +
+                    "requirements = ?, budget = ?, payment_type = ?, duration = ?, " +
+                    "status = ?, updated_at = NOW() WHERE id = ?";
+        
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, job.getTitle());
+            pstmt.setString(2, job.getDescription());
+            pstmt.setString(3, job.getCategory());
+            pstmt.setString(4, job.getSkills());
+            pstmt.setBigDecimal(5, job.getBudget());
+            pstmt.setString(6, job.getBudgetType());
+            pstmt.setString(7, job.getDuration());
+            pstmt.setString(8, job.getStatus());
+            pstmt.setObject(9, job.getId());
+            
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+            
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error updating job", e);
+            return false;
         }
     }
     
     /**
-     * Update a job in the database
-     * @param job The job to update
-     * @return The updated job
-     * @throws SQLException If a database error occurs
+     * Update the status of a job
+     * 
+     * @param id The ID of the job
+     * @param status The new status
+     * @return true if the update was successful, false otherwise
      */
-    public Job update(Job job) throws SQLException {
-        Connection conn = null;
-        PreparedStatement ps = null;
+    public boolean updateStatus(UUID id, String status) {
+        String sql = "UPDATE jobs SET status = ?, updated_at = NOW() WHERE id = ?";
         
-        try {
-            conn = DatabaseUtil.getConnection();
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
-            String sql = "UPDATE jobs SET title = ?, description = ?, requirements = ?, " +
-                    "location = ?, budget = ?, payment_type = ?, duration = ?, category = ?, " +
-                    "skills = ?, status = ?, updated_at = NOW(), expires_at = ?, approved = ? " +
-                    "WHERE id = ?";
+            pstmt.setString(1, status);
+            pstmt.setObject(2, id);
             
-            ps = conn.prepareStatement(sql);
-            ps.setString(1, job.getTitle());
-            ps.setString(2, job.getDescription());
-            ps.setString(3, job.getRequirements());
-            ps.setString(4, job.getLocation());
-            ps.setBigDecimal(5, job.getBudget());
-            ps.setString(6, job.getPaymentType());
-            ps.setString(7, job.getDuration());
-            ps.setString(8, job.getCategory());
-            ps.setString(9, job.getSkills());
-            ps.setString(10, job.getStatus());
-            ps.setTimestamp(11, job.getExpiresAt());
-            ps.setBoolean(12, job.isApproved());
-            ps.setInt(13, job.getId());
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
             
-            int affectedRows = ps.executeUpdate();
-            if (affectedRows == 0) {
-                throw new SQLException("Updating job failed, no rows affected.");
-            }
-            
-            return job;
-        } finally {
-            if (ps != null) try { ps.close(); } catch (SQLException e) { /* ignored */ }
-            if (conn != null) DatabaseUtil.closeConnection(conn);
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error updating job status", e);
+            return false;
         }
     }
     
     /**
      * Delete a job from the database
+     * 
      * @param id The ID of the job to delete
-     * @return true if successful, false otherwise
-     * @throws SQLException If a database error occurs
+     * @return true if the deletion was successful, false otherwise
      */
-    public boolean delete(int id) throws SQLException {
-        Connection conn = null;
-        PreparedStatement ps = null;
+    public boolean delete(UUID id) {
+        String sql = "DELETE FROM jobs WHERE id = ?";
         
-        try {
-            conn = DatabaseUtil.getConnection();
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
-            String sql = "DELETE FROM jobs WHERE id = ?";
+            pstmt.setObject(1, id);
             
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, id);
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
             
-            int affectedRows = ps.executeUpdate();
-            
-            return affectedRows > 0;
-        } finally {
-            if (ps != null) try { ps.close(); } catch (SQLException e) { /* ignored */ }
-            if (conn != null) DatabaseUtil.closeConnection(conn);
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error deleting job", e);
+            return false;
         }
     }
     
     /**
-     * Approve a job
-     * @param id The job ID
-     * @return true if successful, false otherwise
-     * @throws SQLException If a database error occurs
-     */
-    public boolean approveJob(int id) throws SQLException {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        
-        try {
-            conn = DatabaseUtil.getConnection();
-            
-            String sql = "UPDATE jobs SET approved = true, updated_at = NOW() WHERE id = ?";
-            
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, id);
-            
-            int affectedRows = ps.executeUpdate();
-            
-            return affectedRows > 0;
-        } finally {
-            if (ps != null) try { ps.close(); } catch (SQLException e) { /* ignored */ }
-            if (conn != null) DatabaseUtil.closeConnection(conn);
-        }
-    }
-    
-    /**
-     * Close a job
-     * @param id The job ID
-     * @return true if successful, false otherwise
-     * @throws SQLException If a database error occurs
-     */
-    public boolean closeJob(int id) throws SQLException {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        
-        try {
-            conn = DatabaseUtil.getConnection();
-            
-            String sql = "UPDATE jobs SET status = ?, updated_at = NOW() WHERE id = ?";
-            
-            ps = conn.prepareStatement(sql);
-            ps.setString(1, Job.STATUS_CLOSED);
-            ps.setInt(2, id);
-            
-            int affectedRows = ps.executeUpdate();
-            
-            return affectedRows > 0;
-        } finally {
-            if (ps != null) try { ps.close(); } catch (SQLException e) { /* ignored */ }
-            if (conn != null) DatabaseUtil.closeConnection(conn);
-        }
-    }
-    
-    /**
-     * Extract a Job object from a ResultSet
+     * Map a ResultSet to a Job object
+     * 
      * @param rs The ResultSet containing job data
-     * @return A Job object
-     * @throws SQLException If a database error occurs
+     * @return A Job object with data from the ResultSet
+     * @throws SQLException If there is an error accessing the ResultSet
      */
-    private Job extractJobFromResultSet(ResultSet rs) throws SQLException {
+    private Job mapResultSetToJob(ResultSet rs) throws SQLException {
         Job job = new Job();
-        job.setId(rs.getInt("id"));
-        job.setCompanyId(rs.getInt("company_id"));
+        job.setId(UUID.fromString(rs.getString("id")));
+        job.setClientId(UUID.fromString(rs.getString("company_id")));
         job.setTitle(rs.getString("title"));
         job.setDescription(rs.getString("description"));
-        job.setRequirements(rs.getString("requirements"));
-        job.setLocation(rs.getString("location"));
-        job.setBudget(rs.getBigDecimal("budget"));
-        job.setPaymentType(rs.getString("payment_type"));
-        job.setDuration(rs.getString("duration"));
         job.setCategory(rs.getString("category"));
-        job.setSkills(rs.getString("skills"));
+        job.setSkills(rs.getString("requirements"));
+        job.setBudget(rs.getBigDecimal("budget"));
+        job.setBudgetType(rs.getString("payment_type"));
+        job.setDuration(rs.getString("duration"));
         job.setStatus(rs.getString("status"));
-        job.setPostedAt(rs.getTimestamp("posted_at"));
+        job.setCreatedAt(rs.getTimestamp("posted_at"));
         job.setUpdatedAt(rs.getTimestamp("updated_at"));
-        job.setExpiresAt(rs.getTimestamp("expires_at"));
-        job.setApproved(rs.getBoolean("approved"));
+        
         return job;
     }
 }

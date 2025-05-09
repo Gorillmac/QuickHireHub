@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="com.quickhire.model.User" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,8 +15,10 @@
             --accent: #f72585;
             --light: #f8f9fa;
             --dark: #212529;
-            --success: #4caf50;
             --gray: #6c757d;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --danger: #f44336;
             --border-radius: 8px;
             --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             --transition: all 0.3s ease;
@@ -31,21 +34,20 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
             color: var(--dark);
-            background-color: #f8f9fa;
         }
         
         .container {
-            width: 90%;
-            max-width: 1200px;
+            width: 95%;
+            max-width: 1400px;
             margin: 0 auto;
+            padding: 0 15px;
         }
         
-        /* Header Styles */
+        /* Header */
         header {
             background-color: white;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            position: fixed;
-            width: 100%;
+            position: sticky;
             top: 0;
             z-index: 1000;
         }
@@ -58,7 +60,7 @@
         }
         
         .logo {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: 700;
             color: var(--primary);
             text-decoration: none;
@@ -72,93 +74,130 @@
         
         .nav-links {
             display: flex;
-            list-style: none;
-        }
-        
-        .nav-links li {
-            margin-left: 2rem;
+            align-items: center;
         }
         
         .nav-links a {
             text-decoration: none;
             color: var(--dark);
             font-weight: 500;
+            padding: 0.5rem 1rem;
             transition: var(--transition);
-            padding: 0.5rem 0;
-            position: relative;
-        }
-        
-        .nav-links a:after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: 0;
-            left: 0;
-            background-color: var(--primary);
-            transition: var(--transition);
+            border-radius: var(--border-radius);
         }
         
         .nav-links a:hover {
+            background-color: rgba(67, 97, 238, 0.1);
             color: var(--primary);
         }
         
-        .nav-links a:hover:after {
-            width: 100%;
+        .nav-links a.active {
+            background-color: var(--primary);
+            color: white;
         }
         
-        .auth-buttons {
-            display: flex;
-            gap: 1rem;
+        .user-menu {
+            position: relative;
         }
         
-        .btn {
-            display: inline-block;
-            padding: 0.6rem 1.5rem;
-            border-radius: var(--border-radius);
-            font-weight: 600;
-            text-decoration: none;
-            text-align: center;
+        .user-button {
+            background: none;
+            border: none;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
             transition: var(--transition);
         }
         
-        .btn-primary {
-            background-color: var(--primary);
-            color: white;
-            border: 2px solid var(--primary);
+        .user-button:hover {
+            background-color: rgba(67, 97, 238, 0.1);
         }
         
-        .btn-outline {
-            background-color: transparent;
-            color: var(--primary);
-            border: 2px solid var(--primary);
+        .user-button img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
         }
         
-        .btn-primary:hover {
-            background-color: var(--primary-dark);
-            border-color: var(--primary-dark);
-        }
-        
-        .btn-outline:hover {
-            background-color: var(--primary);
-            color: white;
-        }
-        
-        .mobile-menu-btn {
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            width: 200px;
+            padding: 0.5rem 0;
             display: none;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--dark);
+            z-index: 1000;
         }
         
-        /* Hero Section */
+        .dropdown-menu.show {
+            display: block;
+        }
+        
+        .dropdown-menu a, .dropdown-menu button {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            color: var(--dark);
+            transition: var(--transition);
+            width: 100%;
+            text-align: left;
+            border: none;
+            background: none;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        
+        .dropdown-menu a:hover, .dropdown-menu button:hover {
+            background-color: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+        }
+        
+        .dropdown-menu hr {
+            margin: 0.5rem 0;
+            border: none;
+            border-top: 1px solid #eee;
+        }
+        
+        /* Hero section */
         .hero {
-            padding-top: 6rem;
-            padding-bottom: 4rem;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+            color: white;
+            padding: 5rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -100px;
+            right: -100px;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+        
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -50px;
+            left: -50px;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
         }
         
         .hero-container {
@@ -166,77 +205,140 @@
             grid-template-columns: 1fr 1fr;
             gap: 4rem;
             align-items: center;
-            padding: 2rem 0;
+            position: relative;
+            z-index: 2;
         }
         
         .hero-content h1 {
-            font-size: 3rem;
+            font-size: 3.5rem;
+            font-weight: 800;
             line-height: 1.2;
             margin-bottom: 1.5rem;
-            color: var(--dark);
         }
         
         .hero-content p {
             font-size: 1.2rem;
             margin-bottom: 2rem;
-            color: var(--gray);
+            opacity: 0.9;
         }
         
-        .hero-buttons {
+        .cta-buttons {
             display: flex;
             gap: 1rem;
         }
         
-        .hero-stats {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 3rem;
-            text-align: center;
-        }
-        
-        .stat-item h3 {
-            font-size: 2.5rem;
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-        }
-        
-        .stat-item p {
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
             font-size: 1rem;
-            color: var(--gray);
+        }
+        
+        .btn-light {
+            background-color: white;
+            color: var(--primary);
+        }
+        
+        .btn-light:hover {
+            background-color: var(--light);
+            transform: translateY(-3px);
+        }
+        
+        .btn-outline-light {
+            background-color: transparent;
+            border: 2px solid white;
+            color: white;
+        }
+        
+        .btn-outline-light:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-3px);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-3px);
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--primary);
+            color: white;
+            transform: translateY(-3px);
         }
         
         .hero-image {
             position: relative;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
         
-        .hero-img {
-            max-width: 100%;
+        .hero-image img {
+            width: 100%;
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
         }
         
-        /* Features Section */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .stat-item {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        /* Features section */
         .features {
             padding: 5rem 0;
-            background-color: white;
+            background-color: var(--light);
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
         }
         
         .section-title {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-        
-        .section-title h2 {
             font-size: 2.5rem;
+            font-weight: 700;
             color: var(--dark);
             margin-bottom: 1rem;
         }
         
-        .section-title p {
+        .section-subtitle {
             font-size: 1.2rem;
             color: var(--gray);
             max-width: 700px;
@@ -245,15 +347,15 @@
         
         .features-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 2rem;
         }
         
         .feature-card {
             background-color: white;
             border-radius: var(--border-radius);
-            padding: 2rem;
             box-shadow: var(--box-shadow);
+            padding: 2rem;
             transition: var(--transition);
         }
         
@@ -262,161 +364,210 @@
         }
         
         .feature-icon {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            background-color: rgba(67, 97, 238, 0.1);
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 1.5rem;
-            font-size: 1.8rem;
+            width: 60px;
+            height: 60px;
+            background-color: rgba(67, 97, 238, 0.1);
             color: var(--primary);
+            border-radius: 12px;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
         }
         
-        .feature-card h3 {
+        .feature-title {
             font-size: 1.5rem;
+            font-weight: 600;
             margin-bottom: 1rem;
             color: var(--dark);
         }
         
-        .feature-card p {
+        .feature-description {
             color: var(--gray);
+            margin-bottom: 1.5rem;
         }
         
-        /* How It Works Section */
+        .feature-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            font-weight: 500;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        
+        .feature-link:hover {
+            color: var(--primary-dark);
+            gap: 0.75rem;
+        }
+        
+        /* How it works */
         .how-it-works {
             padding: 5rem 0;
-            background-color: #f8f9fa;
         }
         
-        .steps {
-            display: flex;
-            justify-content: space-between;
+        .steps-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 2rem;
             margin-top: 3rem;
+        }
+        
+        .step-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 2rem;
             position: relative;
-        }
-        
-        .steps:before {
-            content: '';
-            position: absolute;
-            top: 3.5rem;
-            left: 10%;
-            width: 80%;
-            height: 2px;
-            background-color: #e0e0e0;
-            z-index: 1;
-        }
-        
-        .step {
             text-align: center;
-            position: relative;
-            z-index: 2;
-            width: 22%;
+            transition: var(--transition);
+        }
+        
+        .step-card:hover {
+            transform: translateY(-10px);
         }
         
         .step-number {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
             background-color: var(--primary);
             color: white;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 1.5rem;
-            font-size: 1.8rem;
             font-weight: 700;
+            font-size: 1.2rem;
         }
         
-        .step h3 {
-            font-size: 1.3rem;
+        .step-icon {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+        }
+        
+        .step-title {
+            font-size: 1.2rem;
+            font-weight: 600;
             margin-bottom: 1rem;
             color: var(--dark);
         }
         
-        .step p {
+        .step-description {
             color: var(--gray);
-            font-size: 0.95rem;
         }
         
-        /* CTA Section */
-        .cta {
+        /* Categories */
+        .categories {
             padding: 5rem 0;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            background-color: var(--light);
+        }
+        
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+        
+        .category-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        
+        .category-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .category-image {
+            height: 150px;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .category-content {
+            padding: 1.5rem;
+        }
+        
+        .category-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+        
+        .category-count {
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        
+        /* CTA section */
+        .cta-section {
+            background: linear-gradient(135deg, #f72585 0%, #7209b7 100%);
             color: white;
+            padding: 5rem 0;
             text-align: center;
         }
         
-        .cta h2 {
+        .cta-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .cta-title {
             font-size: 2.5rem;
+            font-weight: 700;
             margin-bottom: 1.5rem;
         }
         
-        .cta p {
+        .cta-subtitle {
             font-size: 1.2rem;
             margin-bottom: 2rem;
-            max-width: 700px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        
-        .cta-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-        }
-        
-        .btn-light {
-            background-color: white;
-            color: var(--primary);
-            border: 2px solid white;
-        }
-        
-        .btn-light:hover {
-            background-color: transparent;
-            color: white;
-        }
-        
-        .btn-outline-light {
-            background-color: transparent;
-            color: white;
-            border: 2px solid white;
-        }
-        
-        .btn-outline-light:hover {
-            background-color: white;
-            color: var(--primary);
+            opacity: 0.9;
         }
         
         /* Footer */
         footer {
-            background-color: var(--dark);
-            color: white;
+            background-color: white;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
             padding: 4rem 0 2rem;
         }
         
         .footer-grid {
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
+            grid-template-columns: 2fr repeat(3, 1fr);
             gap: 2rem;
             margin-bottom: 3rem;
         }
         
-        .footer-about h3 {
-            font-size: 1.8rem;
-            margin-bottom: 1.5rem;
+        .footer-brand {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .footer-logo {
             display: flex;
             align-items: center;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            gap: 0.5rem;
         }
         
-        .footer-about h3 i {
-            margin-right: 0.5rem;
-        }
-        
-        .footer-about p {
+        .footer-description {
+            color: var(--gray);
             margin-bottom: 1.5rem;
-            color: #adb5bd;
         }
         
         .social-links {
@@ -425,147 +576,193 @@
         }
         
         .social-link {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.1);
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            width: 36px;
+            height: 36px;
+            background-color: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+            border-radius: 50%;
             transition: var(--transition);
             text-decoration: none;
         }
         
         .social-link:hover {
             background-color: var(--primary);
+            color: white;
+            transform: translateY(-3px);
         }
         
-        .footer-links h4 {
+        .footer-heading {
             font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--dark);
             margin-bottom: 1.5rem;
-            position: relative;
-            padding-bottom: 0.5rem;
         }
         
-        .footer-links h4:after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 50px;
-            height: 2px;
-            background-color: var(--primary);
+        .footer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
         }
         
-        .footer-links ul {
-            list-style: none;
-        }
-        
-        .footer-links li {
-            margin-bottom: 0.8rem;
-        }
-        
-        .footer-links a {
-            color: #adb5bd;
+        .footer-link {
+            color: var(--gray);
             text-decoration: none;
             transition: var(--transition);
         }
         
-        .footer-links a:hover {
+        .footer-link:hover {
             color: var(--primary);
             padding-left: 5px;
         }
         
         .footer-bottom {
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
             padding-top: 2rem;
-            text-align: center;
-            color: #adb5bd;
-        }
-        
-        .footer-bottom p {
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--gray);
             font-size: 0.9rem;
         }
         
+        .footer-bottom-links a {
+            color: var(--gray);
+            text-decoration: none;
+            margin-left: 1.5rem;
+            transition: var(--transition);
+        }
+        
+        .footer-bottom-links a:hover {
+            color: var(--primary);
+        }
+        
         /* Responsive Design */
-        @media (max-width: 992px) {
-            .hero-container, .features-grid, .footer-grid {
+        @media (max-width: 1100px) {
+            .hero-content h1 {
+                font-size: 2.5rem;
+            }
+            
+            .footer-grid {
                 grid-template-columns: 1fr 1fr;
+                gap: 2rem;
+            }
+        }
+        
+        @media (max-width: 900px) {
+            .hero-container {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 2rem;
+            }
+            
+            .cta-buttons {
+                justify-content: center;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr 1fr 1fr;
             }
             
             .hero-image {
-                grid-row: 1;
-            }
-            
-            .hero-content {
-                grid-row: 2;
-            }
-            
-            .steps {
-                flex-wrap: wrap;
-            }
-            
-            .step {
-                width: 45%;
-                margin-bottom: 2rem;
-            }
-            
-            .steps:before {
-                display: none;
+                order: -1;
+                max-width: 500px;
+                margin: 0 auto;
             }
         }
         
         @media (max-width: 768px) {
-            .nav-links, .auth-buttons {
-                display: none;
-            }
-            
-            .mobile-menu-btn {
-                display: block;
-            }
-            
-            .hero-container, .features-grid, .footer-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .hero-stats {
+            .header-container {
                 flex-wrap: wrap;
             }
             
-            .stat-item {
-                width: 48%;
-                margin-bottom: 1.5rem;
+            .nav-links {
+                order: 3;
+                width: 100%;
+                margin-top: 1rem;
+                justify-content: center;
             }
             
-            .step {
-                width: 100%;
+            .section-title {
+                font-size: 2rem;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .footer-bottom {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .footer-bottom-links {
+                margin-top: 1rem;
+            }
+            
+            .footer-bottom-links a {
+                margin: 0 0.5rem;
             }
         }
     </style>
 </head>
 <body>
+    <%
+        // Check if user is logged in
+        User currentUser = (User) session.getAttribute("user");
+    %>
+    
     <!-- Header -->
     <header>
         <div class="container header-container">
-            <a href="#" class="logo"><i class="fas fa-bolt"></i> QuickHire</a>
+            <a href="index.jsp" class="logo"><i class="fas fa-bolt"></i> QuickHire</a>
             
-            <ul class="nav-links">
-                <li><a href="index.jsp">Home</a></li>
-                <li><a href="find-jobs.jsp">Find Jobs</a></li>
-                <li><a href="find-talent.jsp">Find Talent</a></li>
-                <li><a href="how-it-works.jsp">How It Works</a></li>
-                <li><a href="about-us.jsp">About Us</a></li>
-            </ul>
-            
-            <div class="auth-buttons">
-                <a href="login.jsp" class="btn btn-outline">Log In</a>
-                <a href="register.jsp" class="btn btn-primary">Sign Up</a>
+            <div class="nav-links">
+                <a href="index.jsp" class="active">Home</a>
+                <a href="find-jobs.jsp">Find Jobs</a>
+                <a href="find-talent.jsp">Find Talent</a>
+                <a href="about-us.jsp">About Us</a>
+                <a href="contact.jsp">Contact</a>
             </div>
             
-            <button class="mobile-menu-btn">
-                <i class="fas fa-bars"></i>
-            </button>
+            <% if (currentUser != null) { %>
+                <!-- User is logged in -->
+                <div class="user-menu">
+                    <button class="user-button" id="userMenuButton">
+                        <img src="https://ui-avatars.com/api/?name=<%= currentUser.getFirstName() %>+<%= currentUser.getLastName() %>&background=4361ee&color=fff" alt="User Avatar">
+                        <span><%= currentUser.getFirstName() %></span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    
+                    <div class="dropdown-menu" id="userDropdown">
+                        <% if (currentUser.isFreelancer()) { %>
+                            <a href="freelancer-dashboard.jsp"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                            <a href="profile.jsp"><i class="fas fa-user"></i> Profile</a>
+                            <a href="my-applications.jsp"><i class="fas fa-file-alt"></i> My Applications</a>
+                        <% } else { %>
+                            <a href="client-dashboard.jsp"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                            <a href="profile.jsp"><i class="fas fa-user"></i> Profile</a>
+                            <a href="my-jobs.jsp"><i class="fas fa-briefcase"></i> My Jobs</a>
+                        <% } %>
+                        <a href="messages.jsp"><i class="fas fa-envelope"></i> Messages</a>
+                        <a href="settings.jsp"><i class="fas fa-cog"></i> Settings</a>
+                        <hr>
+                        <form action="logout" method="post">
+                            <button type="submit"><i class="fas fa-sign-out-alt"></i> Log Out</button>
+                        </form>
+                    </div>
+                </div>
+            <% } else { %>
+                <!-- User is not logged in -->
+                <div class="nav-links">
+                    <a href="login.jsp">Log In</a>
+                    <a href="register.jsp">Sign Up</a>
+                </div>
+            <% } %>
         </div>
     </header>
     
@@ -573,32 +770,32 @@
     <section class="hero">
         <div class="container hero-container">
             <div class="hero-content">
-                <h1>Find the Perfect Freelance Match</h1>
-                <p>QuickHire connects businesses with skilled freelancers. Post a job or find your next gig today!</p>
+                <h1>Connect with the best freelance talent</h1>
+                <p>QuickHire makes it easy to find and hire top freelancers for any project. Post a job or browse profiles to get started.</p>
                 
-                <div class="hero-buttons">
-                    <a href="register.jsp" class="btn btn-primary">Get Started</a>
-                    <a href="#how-it-works" class="btn btn-outline">Learn More</a>
+                <div class="cta-buttons">
+                    <a href="register.jsp?userType=client" class="btn btn-light">Post a Job</a>
+                    <a href="register.jsp?userType=freelancer" class="btn btn-outline-light">Find Work</a>
                 </div>
                 
-                <div class="hero-stats">
+                <div class="stats-container">
                     <div class="stat-item">
-                        <h3>10k+</h3>
-                        <p>Active Freelancers</p>
+                        <div class="stat-number">10K+</div>
+                        <div class="stat-label">Active Freelancers</div>
                     </div>
                     <div class="stat-item">
-                        <h3>5k+</h3>
-                        <p>Companies</p>
+                        <div class="stat-number">5K+</div>
+                        <div class="stat-label">Open Jobs</div>
                     </div>
                     <div class="stat-item">
-                        <h3>20k+</h3>
-                        <p>Completed Jobs</p>
+                        <div class="stat-number">95%</div>
+                        <div class="stat-label">Satisfaction Rate</div>
                     </div>
                 </div>
             </div>
             
             <div class="hero-image">
-                <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" alt="Freelance Team Working" class="hero-img">
+                <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1471&q=80" alt="Team collaborating on a project">
             </div>
         </div>
     </section>
@@ -606,9 +803,9 @@
     <!-- Features Section -->
     <section class="features">
         <div class="container">
-            <div class="section-title">
-                <h2>Why Choose QuickHire?</h2>
-                <p>We make hiring freelancers and finding work simple, efficient, and secure.</p>
+            <div class="section-header">
+                <h2 class="section-title">Why Choose QuickHire?</h2>
+                <p class="section-subtitle">Our platform provides everything you need to connect with talent and complete your projects successfully.</p>
             </div>
             
             <div class="features-grid">
@@ -616,98 +813,163 @@
                     <div class="feature-icon">
                         <i class="fas fa-user-check"></i>
                     </div>
-                    <h3>Verified Talent</h3>
-                    <p>All freelancers are vetted and verified to ensure you get quality work every time.</p>
+                    <h3 class="feature-title">Verified Talent</h3>
+                    <p class="feature-description">Our rigorous verification process ensures you're working with qualified professionals who have the skills they claim.</p>
+                    <a href="about-us.jsp" class="feature-link">Learn More <i class="fas fa-arrow-right"></i></a>
                 </div>
                 
                 <div class="feature-card">
                     <div class="feature-icon">
                         <i class="fas fa-shield-alt"></i>
                     </div>
-                    <h3>Secure Payments</h3>
-                    <p>Our escrow system ensures that payments are only released when you're satisfied with the work.</p>
+                    <h3 class="feature-title">Secure Payments</h3>
+                    <p class="feature-description">Our escrow system protects both parties, releasing payment only when work is completed to satisfaction.</p>
+                    <a href="how-it-works.jsp" class="feature-link">Learn More <i class="fas fa-arrow-right"></i></a>
                 </div>
                 
                 <div class="feature-card">
                     <div class="feature-icon">
                         <i class="fas fa-comments"></i>
                     </div>
-                    <h3>Easy Communication</h3>
-                    <p>Built-in messaging system to discuss project details seamlessly.</p>
+                    <h3 class="feature-title">Seamless Communication</h3>
+                    <p class="feature-description">Our integrated messaging system makes collaboration easy with real-time updates and file sharing.</p>
+                    <a href="features.jsp" class="feature-link">Learn More <i class="fas fa-arrow-right"></i></a>
                 </div>
                 
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-dollar-sign"></i>
+                        <i class="fas fa-tasks"></i>
                     </div>
-                    <h3>No Hidden Fees</h3>
-                    <p>Transparent pricing and payment structure with no surprise charges.</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-globe"></i>
-                    </div>
-                    <h3>Global Talent Pool</h3>
-                    <p>Access to freelancers from around the world with diverse skills and experience.</p>
+                    <h3 class="feature-title">Project Management</h3>
+                    <p class="feature-description">Track progress, manage milestones, and stay organized with our intuitive project tools.</p>
+                    <a href="features.jsp" class="feature-link">Learn More <i class="fas fa-arrow-right"></i></a>
                 </div>
                 
                 <div class="feature-card">
                     <div class="feature-icon">
                         <i class="fas fa-star"></i>
                     </div>
-                    <h3>Rating System</h3>
-                    <p>Find top-rated freelancers based on client reviews and performance history.</p>
+                    <h3 class="feature-title">Ratings & Reviews</h3>
+                    <p class="feature-description">Make informed decisions based on detailed feedback from previous clients and freelancers.</p>
+                    <a href="how-it-works.jsp" class="feature-link">Learn More <i class="fas fa-arrow-right"></i></a>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <h3 class="feature-title">24/7 Support</h3>
+                    <p class="feature-description">Our dedicated team is always available to help resolve any issues that may arise during your project.</p>
+                    <a href="contact.jsp" class="feature-link">Learn More <i class="fas fa-arrow-right"></i></a>
                 </div>
             </div>
         </div>
     </section>
     
-    <!-- How It Works Section -->
-    <section class="how-it-works" id="how-it-works">
+    <!-- How It Works -->
+    <section class="how-it-works">
         <div class="container">
-            <div class="section-title">
-                <h2>How It Works</h2>
-                <p>Getting started with QuickHire is easy. Here's how our platform connects talent with opportunities.</p>
+            <div class="section-header">
+                <h2 class="section-title">How QuickHire Works</h2>
+                <p class="section-subtitle">Getting started is simple. Follow these steps to post a job or find work on our platform.</p>
             </div>
             
-            <div class="steps">
-                <div class="step">
+            <div class="steps-container">
+                <div class="step-card">
                     <div class="step-number">1</div>
-                    <h3>Create Account</h3>
-                    <p>Sign up as a company or freelancer and complete your profile to get started.</p>
+                    <div class="step-icon">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <h3 class="step-title">Create an Account</h3>
+                    <p class="step-description">Sign up as a client or freelancer to access our platform's features.</p>
                 </div>
                 
-                <div class="step">
+                <div class="step-card">
                     <div class="step-number">2</div>
-                    <h3>Post Job / Find Work</h3>
-                    <p>Companies post jobs, freelancers browse and apply to relevant opportunities.</p>
+                    <div class="step-icon">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <h3 class="step-title">Complete Your Profile</h3>
+                    <p class="step-description">Add your skills, experience, and portfolio to stand out.</p>
                 </div>
                 
-                <div class="step">
+                <div class="step-card">
                     <div class="step-number">3</div>
-                    <h3>Collaborate</h3>
-                    <p>Discuss project details, timeline, and payment terms before starting work.</p>
+                    <div class="step-icon">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
+                    <h3 class="step-title">Post or Find Jobs</h3>
+                    <p class="step-description">Create detailed job listings or browse available opportunities.</p>
                 </div>
                 
-                <div class="step">
+                <div class="step-card">
                     <div class="step-number">4</div>
-                    <h3>Complete & Review</h3>
-                    <p>Finalize the project, release payment, and leave feedback for future users.</p>
+                    <div class="step-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h3 class="step-title">Collaborate & Complete</h3>
+                    <p class="step-description">Work together efficiently and get paid securely through our platform.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Categories -->
+    <section class="categories">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Popular Categories</h2>
+                <p class="section-subtitle">Explore top categories to find the perfect freelancer or project for your skills.</p>
+            </div>
+            
+            <div class="categories-grid">
+                <div class="category-card">
+                    <div class="category-image" style="background-image: url('https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1472&q=80');"></div>
+                    <div class="category-content">
+                        <h3 class="category-title">Web Development</h3>
+                        <p class="category-count">1,250+ jobs available</p>
+                        <a href="find-jobs.jsp?category=web-development" class="btn btn-outline">Browse Jobs</a>
+                    </div>
+                </div>
+                
+                <div class="category-card">
+                    <div class="category-image" style="background-image: url('https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1528&q=80');"></div>
+                    <div class="category-content">
+                        <h3 class="category-title">Graphic Design</h3>
+                        <p class="category-count">940+ jobs available</p>
+                        <a href="find-jobs.jsp?category=graphic-design" class="btn btn-outline">Browse Jobs</a>
+                    </div>
+                </div>
+                
+                <div class="category-card">
+                    <div class="category-image" style="background-image: url('https://images.unsplash.com/photo-1533750516457-a7f992034fec?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1506&q=80');"></div>
+                    <div class="category-content">
+                        <h3 class="category-title">Digital Marketing</h3>
+                        <p class="category-count">820+ jobs available</p>
+                        <a href="find-jobs.jsp?category=digital-marketing" class="btn btn-outline">Browse Jobs</a>
+                    </div>
+                </div>
+                
+                <div class="category-card">
+                    <div class="category-image" style="background-image: url('https://images.unsplash.com/photo-1580927752452-89d86da3fa0a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80');"></div>
+                    <div class="category-content">
+                        <h3 class="category-title">Content Writing</h3>
+                        <p class="category-count">760+ jobs available</p>
+                        <a href="find-jobs.jsp?category=content-writing" class="btn btn-outline">Browse Jobs</a>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
     
     <!-- CTA Section -->
-    <section class="cta">
-        <div class="container">
-            <h2>Ready to Get Started?</h2>
-            <p>Join thousands of companies and freelancers already using QuickHire to grow their business and career.</p>
-            
+    <section class="cta-section">
+        <div class="container cta-container">
+            <h2 class="cta-title">Ready to get started?</h2>
+            <p class="cta-subtitle">Join thousands of freelancers and clients who trust QuickHire for their projects.</p>
             <div class="cta-buttons">
-                <a href="register.jsp" class="btn btn-light">Sign Up Now</a>
-                <a href="login.jsp" class="btn btn-outline-light">Log In</a>
+                <a href="register.jsp" class="btn btn-light">Create Account</a>
+                <a href="how-it-works.jsp" class="btn btn-outline-light">Learn More</a>
             </div>
         </div>
     </section>
@@ -716,10 +978,14 @@
     <footer>
         <div class="container">
             <div class="footer-grid">
-                <div class="footer-about">
-                    <h3><i class="fas fa-bolt"></i> QuickHire</h3>
-                    <p>The leading platform for connecting skilled freelancers with businesses looking for top talent. Our mission is to make freelancing simple, secure, and successful for everyone.</p>
-                    
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <i class="fas fa-bolt"></i>
+                        <span>QuickHire</span>
+                    </div>
+                    <p class="footer-description">
+                        QuickHire connects businesses with the best freelance talent for any project, budget, or timeline.
+                    </p>
                     <div class="social-links">
                         <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
                         <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
@@ -728,86 +994,70 @@
                     </div>
                 </div>
                 
-                <div class="footer-links">
-                    <h4>Quick Links</h4>
-                    <ul>
-                        <li><a href="#">Home</a></li>
-                        <li><a href="#">Find Jobs</a></li>
-                        <li><a href="#">Find Talent</a></li>
-                        <li><a href="#">How It Works</a></li>
-                        <li><a href="#">About Us</a></li>
-                    </ul>
+                <div class="footer-links-column">
+                    <h3 class="footer-heading">For Clients</h3>
+                    <div class="footer-links">
+                        <a href="find-talent.jsp" class="footer-link">Find Talent</a>
+                        <a href="post-job.jsp" class="footer-link">Post a Job</a>
+                        <a href="client-how-it-works.jsp" class="footer-link">How It Works</a>
+                        <a href="client-success-stories.jsp" class="footer-link">Success Stories</a>
+                        <a href="pricing.jsp" class="footer-link">Pricing</a>
+                    </div>
                 </div>
                 
-                <div class="footer-links">
-                    <h4>Resources</h4>
-                    <ul>
-                        <li><a href="#">Help Center</a></li>
-                        <li><a href="#">Blog</a></li>
-                        <li><a href="#">FAQ</a></li>
-                        <li><a href="#">Testimonials</a></li>
-                        <li><a href="#">Contact Us</a></li>
-                    </ul>
+                <div class="footer-links-column">
+                    <h3 class="footer-heading">For Freelancers</h3>
+                    <div class="footer-links">
+                        <a href="find-jobs.jsp" class="footer-link">Find Jobs</a>
+                        <a href="create-profile.jsp" class="footer-link">Create Profile</a>
+                        <a href="freelancer-how-it-works.jsp" class="footer-link">How It Works</a>
+                        <a href="freelancer-success-stories.jsp" class="footer-link">Success Stories</a>
+                        <a href="resources.jsp" class="footer-link">Resources</a>
+                    </div>
                 </div>
                 
-                <div class="footer-links">
-                    <h4>Legal</h4>
-                    <ul>
-                        <li><a href="#">Terms of Service</a></li>
-                        <li><a href="#">Privacy Policy</a></li>
-                        <li><a href="#">Cookie Policy</a></li>
-                        <li><a href="#">Dispute Resolution</a></li>
-                        <li><a href="#">Security</a></li>
-                    </ul>
+                <div class="footer-links-column">
+                    <h3 class="footer-heading">Company</h3>
+                    <div class="footer-links">
+                        <a href="about-us.jsp" class="footer-link">About Us</a>
+                        <a href="careers.jsp" class="footer-link">Careers</a>
+                        <a href="blog.jsp" class="footer-link">Blog</a>
+                        <a href="press.jsp" class="footer-link">Press</a>
+                        <a href="contact.jsp" class="footer-link">Contact Us</a>
+                    </div>
                 </div>
             </div>
             
             <div class="footer-bottom">
-                <p>&copy; <%= new java.util.Date().getYear() + 1900 %> QuickHire Inc. All rights reserved.</p>
+                <p>&copy; 2025 QuickHire Inc. All rights reserved.</p>
+                
+                <div class="footer-bottom-links">
+                    <a href="terms.jsp">Terms of Service</a>
+                    <a href="privacy.jsp">Privacy Policy</a>
+                    <a href="cookies.jsp">Cookie Policy</a>
+                    <a href="accessibility.jsp">Accessibility</a>
+                </div>
             </div>
         </div>
     </footer>
     
     <script>
-        // Mobile menu toggle
-        document.querySelector('.mobile-menu-btn').addEventListener('click', function() {
-            const navLinks = document.querySelector('.nav-links');
-            const authButtons = document.querySelector('.auth-buttons');
+        // User dropdown menu
+        const userMenuButton = document.getElementById('userMenuButton');
+        if (userMenuButton) {
+            const userDropdown = document.getElementById('userDropdown');
             
-            navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex';
-            authButtons.style.display = authButtons.style.display === 'flex' ? 'none' : 'flex';
+            userMenuButton.addEventListener('click', function() {
+                userDropdown.classList.toggle('show');
+            });
             
-            if (navLinks.style.display === 'flex') {
-                navLinks.style.flexDirection = 'column';
-                navLinks.style.position = 'absolute';
-                navLinks.style.top = '70px';
-                navLinks.style.left = '0';
-                navLinks.style.width = '100%';
-                navLinks.style.backgroundColor = 'white';
-                navLinks.style.padding = '1rem';
-                navLinks.style.boxShadow = '0 10px 10px rgba(0, 0, 0, 0.1)';
-                
-                document.querySelectorAll('.nav-links li').forEach(item => {
-                    item.style.margin = '1rem 0';
-                });
-                
-                authButtons.style.flexDirection = 'column';
-                authButtons.style.position = 'absolute';
-                authButtons.style.top = navLinks.offsetHeight + 70 + 'px';
-                authButtons.style.left = '0';
-                authButtons.style.width = '100%';
-                authButtons.style.backgroundColor = 'white';
-                authButtons.style.padding = '1rem';
-                authButtons.style.boxShadow = '0 10px 10px rgba(0, 0, 0, 0.1)';
-                
-                document.querySelectorAll('.auth-buttons a').forEach(item => {
-                    item.style.width = '100%';
-                    item.style.marginBottom = '0.5rem';
-                });
-            }
-        });
-        
-        console.log("QuickHire homepage loaded successfully");
+            // Close dropdown when clicking outside
+            window.addEventListener('click', function(event) {
+                if (!userMenuButton.contains(event.target) && !userDropdown.contains(event.target)) {
+                    userDropdown.classList.remove('show');
+                }
+            });
+        }
     </script>
 </body>
 </html>

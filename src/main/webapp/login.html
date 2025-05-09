@@ -1,10 +1,9 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - QuickHire</title>
+    <title>Log In - QuickHire</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
@@ -96,8 +95,8 @@
             color: white;
         }
         
-        /* Registration Form */
-        .register-section {
+        /* Login Form */
+        .login-section {
             flex: 1;
             display: flex;
             align-items: center;
@@ -105,27 +104,27 @@
             padding: 2rem 0;
         }
         
-        .register-container {
+        .login-container {
             width: 100%;
-            max-width: 500px;
+            max-width: 400px;
             background-color: white;
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
             padding: 2rem;
         }
         
-        .register-header {
+        .login-header {
             text-align: center;
             margin-bottom: 2rem;
         }
         
-        .register-header h1 {
+        .login-header h1 {
             font-size: 2rem;
             color: var(--primary);
             margin-bottom: 0.5rem;
         }
         
-        .register-header p {
+        .login-header p {
             color: var(--gray);
         }
         
@@ -154,47 +153,26 @@
             box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
         }
         
-        .user-type-container {
+        .form-check {
             display: flex;
-            gap: 1rem;
+            align-items: center;
             margin-bottom: 1.5rem;
         }
         
-        .user-type-option {
-            flex: 1;
-            background-color: white;
-            border: 1px solid #ddd;
-            border-radius: var(--border-radius);
-            padding: 1.5rem;
-            text-align: center;
-            cursor: pointer;
-            transition: var(--transition);
+        .form-check-input {
+            margin-right: 0.5rem;
         }
         
-        .user-type-option:hover {
-            border-color: var(--primary);
-        }
-        
-        .user-type-option.selected {
-            border-color: var(--primary);
-            background-color: rgba(67, 97, 238, 0.05);
-        }
-        
-        .user-type-option i {
-            font-size: 2rem;
+        .forgot-password {
             color: var(--primary);
-            margin-bottom: 1rem;
-            display: block;
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            float: right;
         }
         
-        .user-type-option h3 {
-            font-size: 1.2rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .user-type-option p {
-            font-size: 0.9rem;
-            color: var(--gray);
+        .forgot-password:hover {
+            text-decoration: underline;
         }
         
         .btn {
@@ -223,12 +201,8 @@
         }
         
         .form-footer {
-            margin-top: 2rem;
             text-align: center;
-        }
-        
-        .form-footer p {
-            margin-bottom: 1rem;
+            margin-top: 1.5rem;
             color: var(--gray);
         }
         
@@ -240,15 +214,6 @@
         
         .form-footer a:hover {
             text-decoration: underline;
-        }
-        
-        .error-message {
-            background-color: rgba(244, 67, 54, 0.1);
-            color: var(--danger);
-            padding: 0.75rem 1rem;
-            border-radius: var(--border-radius);
-            margin-bottom: 1.5rem;
-            font-size: 0.9rem;
         }
         
         /* Footer */
@@ -293,6 +258,15 @@
             font-size: 0.9rem;
         }
         
+        .notice-box {
+            background-color: rgba(76, 175, 80, 0.1);
+            color: var(--success);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
         @media (max-width: 768px) {
             .header-container, .footer-content {
                 flex-direction: column;
@@ -308,12 +282,8 @@
                 margin: 0 0.75rem;
             }
             
-            .register-container {
+            .login-container {
                 padding: 1.5rem;
-            }
-            
-            .user-type-container {
-                flex-direction: column;
             }
         }
     </style>
@@ -322,79 +292,49 @@
     <!-- Header -->
     <header>
         <div class="container header-container">
-            <a href="index.jsp" class="logo"><i class="fas fa-bolt"></i> QuickHire</a>
+            <a href="index.html" class="logo"><i class="fas fa-bolt"></i> QuickHire</a>
             
             <div class="nav-links">
-                <a href="index.jsp">Home</a>
-                <a href="about-us.jsp">About Us</a>
-                <a href="contact.jsp">Contact</a>
-                <a href="login.jsp">Log In</a>
-                <a href="register.jsp" class="active">Sign Up</a>
+                <a href="index.html">Home</a>
+                <a href="login.html" class="active">Log In</a>
+                <a href="register.html">Sign Up</a>
             </div>
         </div>
     </header>
     
-    <!-- Registration Form -->
-    <section class="register-section">
-        <div class="register-container">
-            <div class="register-header">
-                <h1>Create an Account</h1>
-                <p>Join QuickHire to connect with top talent or find work</p>
+    <!-- Login Form -->
+    <section class="login-section">
+        <div class="login-container">
+            <div class="login-header">
+                <h1>Welcome Back</h1>
+                <p>Log in to access your QuickHire account</p>
             </div>
             
-            <% if (request.getAttribute("error") != null) { %>
-                <div class="error-message">
-                    <%= request.getAttribute("error") %>
-                </div>
-            <% } %>
+            <div class="notice-box">
+                <p>The system is currently in demonstration mode. Dynamic features like login are not available yet.</p>
+            </div>
             
-            <form action="register" method="post" id="registerForm">
-                <input type="hidden" name="userType" id="userType" value="${userType != null ? userType : 'freelancer'}">
-                
-                <div class="user-type-container">
-                    <div class="user-type-option ${userType == null || userType == 'freelancer' ? 'selected' : ''}" data-type="freelancer">
-                        <i class="fas fa-laptop-code"></i>
-                        <h3>I'm a Freelancer</h3>
-                        <p>Looking for work</p>
-                    </div>
-                    
-                    <div class="user-type-option ${userType == 'client' ? 'selected' : ''}" data-type="client">
-                        <i class="fas fa-building"></i>
-                        <h3>I'm a Client</h3>
-                        <p>Hiring for a project</p>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="firstName">First Name</label>
-                    <input type="text" id="firstName" name="firstName" class="form-control" value="${firstName != null ? firstName : ''}" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="lastName">Last Name</label>
-                    <input type="text" id="lastName" name="lastName" class="form-control" value="${lastName != null ? lastName : ''}" required>
-                </div>
-                
+            <form action="#" method="post">
                 <div class="form-group">
                     <label for="email">Email Address</label>
-                    <input type="email" id="email" name="email" class="form-control" value="${email != null ? email : ''}" required>
+                    <input type="email" id="email" name="email" class="form-control" required>
                 </div>
                 
                 <div class="form-group">
                     <label for="password">Password</label>
                     <input type="password" id="password" name="password" class="form-control" required>
+                    <a href="#" class="forgot-password">Forgot Password?</a>
                 </div>
                 
-                <div class="form-group">
-                    <label for="confirmPassword">Confirm Password</label>
-                    <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" required>
+                <div class="form-check">
+                    <input type="checkbox" id="rememberMe" name="rememberMe" class="form-check-input">
+                    <label for="rememberMe">Remember me</label>
                 </div>
                 
-                <button type="submit" class="btn btn-primary">Create Account</button>
+                <button type="button" class="btn btn-primary" onclick="alert('Login functionality is not available in demo mode.')">Log In</button>
                 
                 <div class="form-footer">
-                    <p>Already have an account? <a href="login.jsp">Log In</a></p>
-                    <p>By signing up, you agree to our <a href="terms.jsp">Terms of Service</a> and <a href="privacy.jsp">Privacy Policy</a></p>
+                    <p>Don't have an account? <a href="register.html">Sign Up</a></p>
                 </div>
             </form>
         </div>
@@ -410,11 +350,11 @@
                 </div>
                 
                 <div class="footer-links">
-                    <a href="about-us.jsp">About Us</a>
-                    <a href="how-it-works.jsp">How It Works</a>
-                    <a href="terms.jsp">Terms</a>
-                    <a href="privacy.jsp">Privacy</a>
-                    <a href="contact.jsp">Contact</a>
+                    <a href="#">About Us</a>
+                    <a href="#">How It Works</a>
+                    <a href="#">Terms</a>
+                    <a href="#">Privacy</a>
+                    <a href="#">Contact</a>
                 </div>
             </div>
             
@@ -423,42 +363,5 @@
             </div>
         </div>
     </footer>
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // User type selection
-            const userTypeOptions = document.querySelectorAll('.user-type-option');
-            const userTypeInput = document.getElementById('userType');
-            
-            userTypeOptions.forEach(option => {
-                option.addEventListener('click', function() {
-                    // Remove 'selected' class from all options
-                    userTypeOptions.forEach(opt => opt.classList.remove('selected'));
-                    
-                    // Add 'selected' class to clicked option
-                    this.classList.add('selected');
-                    
-                    // Update hidden input value
-                    userTypeInput.value = this.getAttribute('data-type');
-                });
-            });
-            
-            // Form validation
-            const registerForm = document.getElementById('registerForm');
-            
-            registerForm.addEventListener('submit', function(e) {
-                const password = document.getElementById('password').value;
-                const confirmPassword = document.getElementById('confirmPassword').value;
-                
-                if (password !== confirmPassword) {
-                    e.preventDefault();
-                    alert('Passwords do not match!');
-                    return false;
-                }
-                
-                return true;
-            });
-        });
-    </script>
 </body>
 </html>

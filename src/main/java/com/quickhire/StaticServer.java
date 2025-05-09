@@ -8,10 +8,10 @@ import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.util.resource.Resource;
 
 /**
- * A static file server for QuickHire - serving only HTML, CSS, and JS
- * This avoids compilation issues with the JSP and servlet components
+ * A standalone static file server for QuickHire
+ * This class can be run directly without compiling the entire project
  */
-public class SimpleServer {
+public class StaticServer {
     public static void main(String[] args) throws Exception {
         System.out.println("Initializing QuickHire static file server...");
         
