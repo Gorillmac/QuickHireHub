@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Application entity class representing job applications
@@ -17,9 +18,9 @@ public class Application {
     public static final String STATUS_WITHDRAWN = "WITHDRAWN";
     public static final String STATUS_COMPLETED = "COMPLETED";
     
-    private int id;
-    private int jobId;
-    private int freelancerId;
+    private UUID id;
+    private UUID jobId;
+    private UUID freelancerId;
     private String coverLetter;
     private BigDecimal proposedRate;
     private int estimatedDuration; // In days
