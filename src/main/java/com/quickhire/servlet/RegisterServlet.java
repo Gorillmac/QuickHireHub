@@ -1,7 +1,8 @@
 package com.quickhire.servlet;
 
 import java.io.IOException;
-import java.util.UUID;
+import java.io.PrintWriter;
+import java.util.Optional;
 
 import com.quickhire.dao.UserDAO;
 import com.quickhire.model.User;
@@ -13,6 +14,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+
+import org.json.JSONObject;
 
 /**
  * Servlet to handle user registration
@@ -27,6 +30,7 @@ public class RegisterServlet extends HttpServlet {
     public void init() throws ServletException {
         super.init();
         userDAO = new UserDAO();
+        System.out.println("RegisterServlet initialized");
     }
     
     /**
@@ -35,116 +39,131 @@ public class RegisterServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        // Retrieve form parameters
-        String userType = request.getParameter("userType");
-        String firstName = request.getParameter("firstName");
-        String lastName = request.getParameter("lastName");
-        String email = request.getParameter("email");
-        String password = request.getParameter("password");
-        String confirmPassword = request.getParameter("confirmPassword");
+        System.out.println("Registration request received");
         
-        // Validate input
-        if (firstName == null || firstName.trim().isEmpty() ||
-            lastName == null || lastName.trim().isEmpty() ||
-            email == null || email.trim().isEmpty() ||
-            password == null || password.trim().isEmpty() ||
-            confirmPassword == null || confirmPassword.trim().isEmpty() ||
-            userType == null || userType.trim().isEmpty()) {
+        // Set response type to JSON
+        response.setContentType("application/json");
+        PrintWriter out = response.getWriter();
+        JSONObject jsonResponse = new JSONObject();
+        
+        try {
+            // Retrieve form parameters
+            String firstName = request.getParameter("firstName");
+            String lastName = request.getParameter("lastName");
+            String email = request.getParameter("email");
+            String password = request.getParameter("password");
+            String confirmPassword = request.getParameter("confirmPassword");
+            String userType = request.getParameter("userType"); // freelancer or client
             
-            request.setAttribute("error", "All fields are required");
-            request.setAttribute("firstName", firstName);
-            request.setAttribute("lastName", lastName);
-            request.setAttribute("email", email);
-            request.setAttribute("userType", userType);
-            request.getRequestDispatcher("register.jsp").forward(request, response);
-            return;
-        }
-        
-        // Check if passwords match
-        if (!password.equals(confirmPassword)) {
-            request.setAttribute("error", "Passwords do not match");
-            request.setAttribute("firstName", firstName);
-            request.setAttribute("lastName", lastName);
-            request.setAttribute("email", email);
-            request.setAttribute("userType", userType);
-            request.getRequestDispatcher("register.jsp").forward(request, response);
-            return;
-        }
-        
-        // Check if email is already in use
-        if (userDAO.findByEmail(email).isPresent()) {
-            request.setAttribute("error", "Email is already registered");
-            request.setAttribute("firstName", firstName);
-            request.setAttribute("lastName", lastName);
-            request.setAttribute("userType", userType);
-            request.getRequestDispatcher("register.jsp").forward(request, response);
-            return;
-        }
-        
-        // Create user
-        User user = new User();
-        user.setId(UUID.randomUUID());
-        user.setFirstName(firstName);
-        user.setLastName(lastName);
-        user.setEmail(email);
-        
-        // Generate salt and hash password
-        String salt = PasswordUtil.generateSalt();
-        String hashedPassword = PasswordUtil.hashPasswordWithSalt(password, salt);
-        
-        user.setPasswordHash(hashedPassword);
-        user.setSalt(salt);
-        user.setUserType(userType);
-        
-        // Save user to database
-        boolean success = userDAO.create(user);
-        
-        if (success) {
-            // Auto-login user
-            HttpSession session = request.getSession();
-            session.setAttribute("user", user);
-            session.setAttribute("userId", user.getId().toString());
-            session.setAttribute("userEmail", user.getEmail());
-            session.setAttribute("userType", user.getUserType());
+            System.out.println("Registration attempt for email: " + email + ", user type: " + userType);
             
-            // Redirect to appropriate dashboard
-            if ("freelancer".equalsIgnoreCase(userType)) {
-                response.sendRedirect("freelancer-dashboard.jsp");
-            } else if ("client".equalsIgnoreCase(userType)) {
-                response.sendRedirect("client-dashboard.jsp");
-            } else {
-                response.sendRedirect("index.jsp");
+            // Validate input
+            if (firstName == null || firstName.trim().isEmpty() ||
+                lastName == null || lastName.trim().isEmpty() ||
+                email == null || email.trim().isEmpty() ||
+                password == null || password.trim().isEmpty() ||
+                confirmPassword == null || confirmPassword.trim().isEmpty() ||
+                userType == null || userType.trim().isEmpty()) {
+                
+                jsonResponse.put("error", "All fields are required");
+                out.print(jsonResponse.toString());
+                return;
             }
-        } else {
-            request.setAttribute("error", "Registration failed. Please try again.");
-            request.setAttribute("firstName", firstName);
-            request.setAttribute("lastName", lastName);
-            request.setAttribute("email", email);
-            request.setAttribute("userType", userType);
-            request.getRequestDispatcher("register.jsp").forward(request, response);
+            
+            // Validate email format
+            String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+            if (!email.matches(emailRegex)) {
+                jsonResponse.put("error", "Please enter a valid email address");
+                out.print(jsonResponse.toString());
+                return;
+            }
+            
+            // Check if passwords match
+            if (!password.equals(confirmPassword)) {
+                jsonResponse.put("error", "Passwords do not match");
+                out.print(jsonResponse.toString());
+                return;
+            }
+            
+            // Check password length
+            if (password.length() < 8) {
+                jsonResponse.put("error", "Password must be at least 8 characters long");
+                out.print(jsonResponse.toString());
+                return;
+            }
+            
+            // Check if user already exists
+            Optional<User> existingUser = userDAO.findByEmail(email);
+            if (existingUser.isPresent()) {
+                jsonResponse.put("error", "Email is already registered");
+                out.print(jsonResponse.toString());
+                return;
+            }
+            
+            // Create new user
+            User user = new User();
+            user.setFirstName(firstName);
+            user.setLastName(lastName);
+            user.setEmail(email);
+            user.setUserType(userType.toUpperCase());
+            
+            // Generate salt and hash password
+            String salt = PasswordUtil.generateSalt();
+            String passwordHash = PasswordUtil.hashPasswordWithSalt(password, salt);
+            
+            user.setSalt(salt);
+            user.setPasswordHash(passwordHash);
+            
+            // Save user to database
+            boolean success = userDAO.create(user);
+            
+            if (success) {
+                // Store user in session
+                HttpSession session = request.getSession();
+                session.setAttribute("user", user);
+                session.setAttribute("userId", user.getId().toString());
+                session.setAttribute("userRole", user.getUserType());
+                session.setAttribute("userEmail", user.getEmail());
+                session.setAttribute("userName", user.getFullName());
+                
+                // Default session timeout - 30 minutes
+                session.setMaxInactiveInterval(30 * 60);
+                
+                // Determine redirect URL based on user type
+                String redirectUrl = "";
+                if (user.isFreelancer()) {
+                    redirectUrl = "freelancer-dashboard.html";
+                } else if (user.isClient()) {
+                    redirectUrl = "client-dashboard.html";
+                } else {
+                    redirectUrl = "index.html";
+                }
+                
+                System.out.println("Registration successful. Redirecting to: " + redirectUrl);
+                
+                jsonResponse.put("success", "Registration successful! You are now logged in.");
+                jsonResponse.put("redirect", redirectUrl);
+                jsonResponse.put("userRole", user.getUserType());
+            } else {
+                jsonResponse.put("error", "Registration failed. Please try again.");
+            }
+            
+        } catch (Exception e) {
+            System.err.println("Registration error: " + e.getMessage());
+            e.printStackTrace();
+            jsonResponse.put("error", "An error occurred during registration. Please try again.");
         }
+        
+        out.print(jsonResponse.toString());
     }
     
     /**
-     * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+     * Handle GET requests - redirect to registration page
      */
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        // Check if user is already logged in
-        HttpSession session = request.getSession(false);
-        if (session != null && session.getAttribute("userId") != null) {
-            // User is already logged in, redirect based on user type
-            String userType = (String) session.getAttribute("userType");
-            if ("freelancer".equalsIgnoreCase(userType)) {
-                response.sendRedirect("freelancer-dashboard.jsp");
-            } else if ("client".equalsIgnoreCase(userType)) {
-                response.sendRedirect("client-dashboard.jsp");
-            } else {
-                response.sendRedirect("index.jsp");
-            }
-        } else {
-            // User is not logged in, show registration form
-            request.getRequestDispatcher("register.jsp").forward(request, response);
-        }
+        // Simply forward to the registration page
+        response.sendRedirect("register.html");
     }
 }
