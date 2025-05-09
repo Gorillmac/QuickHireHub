@@ -21,8 +21,10 @@
 /home/runner/workspace/src/main/java/com/quickhire/controller/ReportServlet.java
 /home/runner/workspace/src/main/java/com/quickhire/JettyServer.java
 /home/runner/workspace/src/main/java/com/quickhire/controller/MessageServlet.java
+/home/runner/workspace/src/main/java/com/quickhire/servlet/RegisterServlet.java
 /home/runner/workspace/src/main/java/com/quickhire/dao/UserDAO.java
 /home/runner/workspace/src/main/java/com/quickhire/controller/ApplicationServlet.java
 /home/runner/workspace/src/main/java/com/quickhire/util/PasswordUtils.java
 /home/runner/workspace/src/main/java/com/quickhire/dao/ApplicationDAO.java
 /home/runner/workspace/src/main/java/com/quickhire/SimpleServer.java
+/home/runner/workspace/src/main/java/com/quickhire/servlet/LoginServlet.java

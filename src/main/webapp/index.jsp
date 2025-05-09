@@ -551,11 +551,11 @@
             <a href="#" class="logo"><i class="fas fa-bolt"></i> QuickHire</a>
             
             <ul class="nav-links">
-                <li><a href="#">Home</a></li>
-                <li><a href="#">Find Jobs</a></li>
-                <li><a href="#">Find Talent</a></li>
-                <li><a href="#">How It Works</a></li>
-                <li><a href="#">About Us</a></li>
+                <li><a href="index.jsp">Home</a></li>
+                <li><a href="find-jobs.jsp">Find Jobs</a></li>
+                <li><a href="find-talent.jsp">Find Talent</a></li>
+                <li><a href="how-it-works.jsp">How It Works</a></li>
+                <li><a href="about-us.jsp">About Us</a></li>
             </ul>
             
             <div class="auth-buttons">

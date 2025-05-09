@@ -11,8 +11,10 @@ com/quickhire/util/PasswordUtils.class
 com/quickhire/controller/ReportServlet.class
 com/quickhire/model/Job.class
 com/quickhire/model/Review.class
+com/quickhire/servlet/LoginServlet.class
 com/quickhire/controller/JobServlet.class
 com/quickhire/model/Report.class
+com/quickhire/servlet/RegisterServlet.class
 com/quickhire/JettyServer.class
 com/quickhire/dao/JobDAO.class
 com/quickhire/controller/AuthServlet.class
