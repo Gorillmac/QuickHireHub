@@ -20,6 +20,9 @@
             --border-radius: 8px;
             --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             --transition: all 0.3s ease;
+            --animation-slow: 1s;
+            --animation-medium: 0.6s;
+            --animation-fast: 0.3s;
         }
         
         * {
@@ -64,10 +67,28 @@
             text-decoration: none;
             display: flex;
             align-items: center;
+            position: relative;
+            overflow: hidden;
         }
         
         .logo i {
             margin-right: 0.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        .logo::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+        
+        .logo:hover::after {
+            width: 100%;
         }
         
         .nav-links {
@@ -103,26 +124,49 @@
             overflow: hidden;
         }
         
+        @keyframes moveBackground {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        
         .hero::before {
             content: '';
             position: absolute;
-            top: -100px;
-            right: -100px;
-            width: 300px;
-            height: 300px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, 
+                        rgba(67, 97, 238, 0.8) 0%, 
+                        rgba(76, 201, 240, 0.8) 25%, 
+                        rgba(58, 12, 163, 0.8) 50%, 
+                        rgba(247, 37, 133, 0.8) 75%, 
+                        rgba(67, 97, 238, 0.8) 100%);
+            background-size: 400% 400%;
+            animation: moveBackground 15s ease infinite;
+            z-index: 0;
         }
         
         .hero::after {
             content: '';
             position: absolute;
-            bottom: -50px;
-            left: -50px;
-            width: 200px;
-            height: 200px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 10%),
+                radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.1) 0%, transparent 10%),
+                radial-gradient(circle at 40% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 10%),
+                radial-gradient(circle at 60% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 10%);
+            z-index: 1;
         }
         
         .hero-container {
@@ -134,22 +178,94 @@
             z-index: 2;
         }
         
+        /* Adding animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+            100% {
+                transform: translateY(0px);
+            }
+        }
+        
         .hero-content h1 {
             font-size: 3.5rem;
             font-weight: 800;
             line-height: 1.2;
             margin-bottom: 1.5rem;
+            animation: fadeInRight var(--animation-medium) ease-out;
         }
         
         .hero-content p {
             font-size: 1.2rem;
             margin-bottom: 2rem;
             opacity: 0.9;
+            animation: fadeInRight var(--animation-medium) ease-out 0.2s;
         }
         
         .cta-buttons {
             display: flex;
             gap: 1rem;
+            animation: fadeInRight var(--animation-medium) ease-out 0.4s;
         }
         
         .btn {
@@ -212,12 +328,14 @@
         
         .hero-image {
             position: relative;
+            animation: fadeInLeft var(--animation-medium) ease-out;
         }
         
         .hero-image img {
             width: 100%;
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
+            animation: float 6s ease-in-out infinite;
         }
         
         .stats-container {
@@ -225,6 +343,7 @@
             grid-template-columns: repeat(3, 1fr);
             gap: 2rem;
             margin-top: 2rem;
+            animation: fadeInUp var(--animation-medium) ease-out 0.6s;
         }
         
         .stat-item {
@@ -232,12 +351,19 @@
             padding: 1rem;
             border-radius: var(--border-radius);
             text-align: center;
+            transition: var(--transition);
+        }
+        
+        .stat-item:hover {
+            transform: translateY(-5px);
+            background-color: rgba(255, 255, 255, 0.2);
         }
         
         .stat-number {
             font-size: 2rem;
             font-weight: 700;
             margin-bottom: 0.5rem;
+            animation: scaleIn var(--animation-medium) ease-out forwards;
         }
         
         .stat-label {
@@ -261,6 +387,7 @@
             font-weight: 700;
             color: var(--dark);
             margin-bottom: 1rem;
+            animation: fadeInUp var(--animation-medium) ease-out;
         }
         
         .section-subtitle {
@@ -268,6 +395,7 @@
             color: var(--gray);
             max-width: 700px;
             margin: 0 auto;
+            animation: fadeInUp var(--animation-medium) ease-out 0.2s;
         }
         
         .features-grid {
@@ -282,10 +410,26 @@
             box-shadow: var(--box-shadow);
             padding: 2rem;
             transition: var(--transition);
+            animation: fadeInUp var(--animation-medium) ease-out;
+            animation-fill-mode: both;
+            opacity: 0;
+        }
+        
+        .feature-card:nth-child(1) {
+            animation-delay: 0.3s;
+        }
+        
+        .feature-card:nth-child(2) {
+            animation-delay: 0.5s;
+        }
+        
+        .feature-card:nth-child(3) {
+            animation-delay: 0.7s;
         }
         
         .feature-card:hover {
             transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
         }
         
         .feature-icon {
@@ -299,6 +443,13 @@
             border-radius: 12px;
             font-size: 1.5rem;
             margin-bottom: 1.5rem;
+            transition: var(--transition);
+        }
+        
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1);
+            background-color: var(--primary);
+            color: white;
         }
         
         .feature-title {
@@ -333,6 +484,7 @@
             background-color: white;
             box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
             padding: 4rem 0 2rem;
+            position: relative;
         }
         
         .footer-grid {
@@ -340,11 +492,13 @@
             grid-template-columns: 2fr repeat(3, 1fr);
             gap: 2rem;
             margin-bottom: 3rem;
+            animation: fadeInUp var(--animation-medium) ease-out;
         }
         
         .footer-brand {
             display: flex;
             flex-direction: column;
+            animation: fadeInUp var(--animation-medium) ease-out 0.1s;
         }
         
         .footer-logo {
@@ -355,16 +509,19 @@
             color: var(--primary);
             margin-bottom: 1rem;
             gap: 0.5rem;
+            animation: fadeInRight var(--animation-medium) ease-out 0.2s;
         }
         
         .footer-description {
             color: var(--gray);
             margin-bottom: 1.5rem;
+            animation: fadeInUp var(--animation-medium) ease-out 0.3s;
         }
         
         .social-links {
             display: flex;
             gap: 1rem;
+            animation: fadeInUp var(--animation-medium) ease-out 0.4s;
         }
         
         .social-link {
@@ -391,23 +548,42 @@
             font-weight: 600;
             color: var(--dark);
             margin-bottom: 1.5rem;
+            animation: fadeInUp var(--animation-medium) ease-out 0.2s;
         }
         
         .footer-links {
             display: flex;
             flex-direction: column;
             gap: 0.75rem;
+            animation: fadeInUp var(--animation-medium) ease-out 0.3s;
         }
         
         .footer-link {
             color: var(--gray);
             text-decoration: none;
             transition: var(--transition);
+            position: relative;
+            display: inline-block;
         }
         
         .footer-link:hover {
             color: var(--primary);
             padding-left: 5px;
+        }
+        
+        .footer-link::before {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 1px;
+            bottom: -2px;
+            left: 0;
+            background-color: var(--primary);
+            transition: var(--transition);
+        }
+        
+        .footer-link:hover::before {
+            width: 100%;
         }
         
         .footer-bottom {
@@ -418,6 +594,7 @@
             align-items: center;
             color: var(--gray);
             font-size: 0.9rem;
+            animation: fadeInUp var(--animation-medium) ease-out 0.5s;
         }
         
         .footer-bottom-links a {
@@ -425,10 +602,58 @@
             text-decoration: none;
             margin-left: 1.5rem;
             transition: var(--transition);
+            position: relative;
         }
         
         .footer-bottom-links a:hover {
             color: var(--primary);
+        }
+        
+        .footer-bottom-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 1px;
+            bottom: -2px;
+            left: 0;
+            background-color: var(--primary);
+            transition: var(--transition);
+        }
+        
+        .footer-bottom-links a:hover::after {
+            width: 100%;
+        }
+        
+        /* Scroll to top button */
+        .scroll-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 45px;
+            height: 45px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 999;
+        }
+        
+        .scroll-top.active {
+            opacity: 1;
+            pointer-events: auto;
+            animation: pulse 2s infinite;
+        }
+        
+        .scroll-top:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-5px);
         }
         
         /* Responsive Design */
@@ -530,15 +755,15 @@
                 
                 <div class="stats-container">
                     <div class="stat-item">
-                        <div class="stat-number">10K+</div>
+                        <div class="stat-number" id="freelancer-count">0</div>
                         <div class="stat-label">Active Freelancers</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-number">5K+</div>
+                        <div class="stat-number" id="job-count">0</div>
                         <div class="stat-label">Open Jobs</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-number">95%</div>
+                        <div class="stat-number" id="satisfaction-rate">0%</div>
                         <div class="stat-label">Satisfaction Rate</div>
                     </div>
                 </div>
@@ -648,5 +873,57 @@
             </div>
         </div>
     </footer>
+
+    <script>
+        // Animated Counters for Stats
+        document.addEventListener('DOMContentLoaded', () => {
+            const animateCounter = (element, target, suffix = '', duration = 2000) => {
+                let start = 0;
+                const isPercentage = suffix === '%';
+                const increment = isPercentage ? 1 : Math.ceil(target / (duration / 50));
+                const finalTarget = isPercentage ? parseInt(target) : parseInt(target.replace(/[^\d]/g, ''));
+                
+                const timer = setInterval(() => {
+                    start += increment;
+                    if (start >= finalTarget) {
+                        element.textContent = isPercentage ? `${finalTarget}%` : `${finalTarget}K+`;
+                        clearInterval(timer);
+                    } else {
+                        element.textContent = isPercentage ? `${start}%` : `${start}K+`;
+                    }
+                }, 50);
+            };
+
+            // Function to check if element is in viewport
+            const isInViewport = (element) => {
+                const rect = element.getBoundingClientRect();
+                return (
+                    rect.top >= 0 &&
+                    rect.left >= 0 &&
+                    rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+                    rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+                );
+            };
+
+            // Start animation when in viewport
+            const startCountersWhenVisible = () => {
+                const freelancerCount = document.getElementById('freelancer-count');
+                const jobCount = document.getElementById('job-count');
+                const satisfactionRate = document.getElementById('satisfaction-rate');
+                
+                if (isInViewport(freelancerCount) && !freelancerCount.classList.contains('counted')) {
+                    freelancerCount.classList.add('counted');
+                    animateCounter(freelancerCount, '10');
+                    animateCounter(jobCount, '5');
+                    animateCounter(satisfactionRate, '95', '%');
+                    window.removeEventListener('scroll', startCountersWhenVisible);
+                }
+            };
+            
+            // Start immediately if already in viewport, otherwise on scroll
+            startCountersWhenVisible();
+            window.addEventListener('scroll', startCountersWhenVisible);
+        });
+    </script>
 </body>
 </html>
