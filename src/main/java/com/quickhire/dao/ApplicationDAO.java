@@ -8,6 +8,7 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import com.quickhire.model.Application;
 import com.quickhire.util.DatabaseUtil;
@@ -31,29 +32,25 @@ public class ApplicationDAO {
         try {
             conn = DatabaseUtil.getConnection();
             
-            String sql = "INSERT INTO applications (job_id, freelancer_id, cover_letter, " +
+            String sql = "INSERT INTO applications (id, job_id, freelancer_id, cover_letter, " +
                     "proposed_rate, estimated_duration, status, applied_at, updated_at) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())";
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
             
-            ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            ps.setInt(1, application.getJobId());
-            ps.setInt(2, application.getFreelancerId());
-            ps.setString(3, application.getCoverLetter());
-            ps.setBigDecimal(4, application.getProposedRate());
-            ps.setInt(5, application.getEstimatedDuration());
-            ps.setString(6, application.getStatus());
+            ps = conn.prepareStatement(sql);
+            ps.setObject(1, application.getId());
+            ps.setObject(2, application.getJobId());
+            ps.setObject(3, application.getFreelancerId());
+            ps.setString(4, application.getCoverLetter());
+            ps.setBigDecimal(5, application.getProposedRate());
+            ps.setInt(6, application.getEstimatedDuration());
+            ps.setString(7, application.getStatus());
             
             int affectedRows = ps.executeUpdate();
             if (affectedRows == 0) {
                 throw new SQLException("Creating application failed, no rows affected.");
             }
             
-            rs = ps.getGeneratedKeys();
-            if (rs.next()) {
-                application.setId(rs.getInt(1));
-            } else {
-                throw new SQLException("Creating application failed, no ID obtained.");
-            }
+            // UUID is already set in the Application constructor, no need to fetch generated keys
             
             return application;
         } finally {
@@ -69,7 +66,7 @@ public class ApplicationDAO {
      * @return The application or null if not found
      * @throws SQLException If a database error occurs
      */
-    public Application findById(int id) throws SQLException {
+    public Application findById(UUID id) throws SQLException {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -80,7 +77,7 @@ public class ApplicationDAO {
             String sql = "SELECT * FROM applications WHERE id = ?";
             
             ps = conn.prepareStatement(sql);
-            ps.setInt(1, id);
+            ps.setObject(1, id);
             
             rs = ps.executeQuery();
             
@@ -134,7 +131,7 @@ public class ApplicationDAO {
      * @return List of applications for the job
      * @throws SQLException If a database error occurs
      */
-    public List<Application> findByJobId(int jobId) throws SQLException {
+    public List<Application> findByJobId(UUID jobId) throws SQLException {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -145,7 +142,7 @@ public class ApplicationDAO {
             String sql = "SELECT * FROM applications WHERE job_id = ? ORDER BY applied_at DESC";
             
             ps = conn.prepareStatement(sql);
-            ps.setInt(1, jobId);
+            ps.setObject(1, jobId);
             
             rs = ps.executeQuery();
             
@@ -168,7 +165,7 @@ public class ApplicationDAO {
      * @return List of applications from the freelancer
      * @throws SQLException If a database error occurs
      */
-    public List<Application> findByFreelancerId(int freelancerId) throws SQLException {
+    public List<Application> findByFreelancerId(UUID freelancerId) throws SQLException {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -179,7 +176,7 @@ public class ApplicationDAO {
             String sql = "SELECT * FROM applications WHERE freelancer_id = ? ORDER BY applied_at DESC";
             
             ps = conn.prepareStatement(sql);
-            ps.setInt(1, freelancerId);
+            ps.setObject(1, freelancerId);
             
             rs = ps.executeQuery();
             
@@ -203,7 +200,7 @@ public class ApplicationDAO {
      * @return true if already applied, false otherwise
      * @throws SQLException If a database error occurs
      */
-    public boolean hasApplied(int jobId, int freelancerId) throws SQLException {
+    public boolean hasApplied(UUID jobId, UUID freelancerId) throws SQLException {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -214,8 +211,8 @@ public class ApplicationDAO {
             String sql = "SELECT COUNT(*) FROM applications WHERE job_id = ? AND freelancer_id = ?";
             
             ps = conn.prepareStatement(sql);
-            ps.setInt(1, jobId);
-            ps.setInt(2, freelancerId);
+            ps.setObject(1, jobId);
+            ps.setObject(2, freelancerId);
             
             rs = ps.executeQuery();
             

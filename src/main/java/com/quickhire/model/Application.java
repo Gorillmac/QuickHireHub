@@ -33,19 +33,23 @@ public class Application {
     
     // Default constructor
     public Application() {
+        this.id = UUID.randomUUID();
+        this.status = STATUS_PENDING;
+        this.appliedAt = new Timestamp(System.currentTimeMillis());
+        this.updatedAt = new Timestamp(System.currentTimeMillis());
     }
     
     // Constructor with essential fields
-    public Application(int jobId, int freelancerId, String coverLetter, BigDecimal proposedRate) {
+    public Application(UUID jobId, UUID freelancerId, String coverLetter, BigDecimal proposedRate) {
+        this();
         this.jobId = jobId;
         this.freelancerId = freelancerId;
         this.coverLetter = coverLetter;
         this.proposedRate = proposedRate;
-        this.status = STATUS_PENDING;
     }
     
     // Full constructor
-    public Application(int id, int jobId, int freelancerId, String coverLetter, 
+    public Application(UUID id, UUID jobId, UUID freelancerId, String coverLetter, 
             BigDecimal proposedRate, int estimatedDuration, String status, 
             Timestamp appliedAt, Timestamp updatedAt) {
         this.id = id;
@@ -60,27 +64,27 @@ public class Application {
     }
     
     // Getters and setters
-    public int getId() {
+    public UUID getId() {
         return id;
     }
     
-    public void setId(int id) {
+    public void setId(UUID id) {
         this.id = id;
     }
     
-    public int getJobId() {
+    public UUID getJobId() {
         return jobId;
     }
     
-    public void setJobId(int jobId) {
+    public void setJobId(UUID jobId) {
         this.jobId = jobId;
     }
     
-    public int getFreelancerId() {
+    public UUID getFreelancerId() {
         return freelancerId;
     }
     
-    public void setFreelancerId(int freelancerId) {
+    public void setFreelancerId(UUID freelancerId) {
         this.freelancerId = freelancerId;
     }
     
