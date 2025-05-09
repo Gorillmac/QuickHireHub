@@ -1,6 +1,8 @@
 package com.quickhire.model;
 
 import java.sql.Timestamp;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Review entity class representing reviews between users
@@ -13,6 +15,9 @@ public class Review {
     private int rating; // 1-5 stars
     private String comment;
     private Timestamp createdAt;
+    
+    // Attributes map for storing related objects
+    private Map<String, Object> attributes = new HashMap<>();
     
     // Default constructor
     public Review() {
@@ -94,6 +99,23 @@ public class Review {
     
     public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
+    }
+    
+    // Attribute methods for storing related objects
+    public void setAttribute(String key, Object value) {
+        attributes.put(key, value);
+    }
+    
+    public Object getAttribute(String key) {
+        return attributes.get(key);
+    }
+    
+    public User getReviewer() {
+        return (User) getAttribute("reviewer");
+    }
+    
+    public Job getJob() {
+        return (Job) getAttribute("job");
     }
     
     @Override

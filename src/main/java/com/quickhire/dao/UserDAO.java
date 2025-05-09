@@ -339,6 +339,35 @@ public class UserDAO {
     }
     
     /**
+     * Update a user's password
+     * @param id The user ID
+     * @param passwordHash The new password hash
+     * @return true if successful, false otherwise
+     * @throws SQLException If a database error occurs
+     */
+    public boolean updatePassword(int id, String passwordHash) throws SQLException {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        
+        try {
+            conn = DatabaseUtil.getConnection();
+            
+            String sql = "UPDATE users SET password_hash = ?, updated_at = NOW() WHERE id = ?";
+            
+            ps = conn.prepareStatement(sql);
+            ps.setString(1, passwordHash);
+            ps.setInt(2, id);
+            
+            int affectedRows = ps.executeUpdate();
+            
+            return affectedRows > 0;
+        } finally {
+            if (ps != null) try { ps.close(); } catch (SQLException e) { /* ignored */ }
+            if (conn != null) DatabaseUtil.closeConnection(conn);
+        }
+    }
+    
+    /**
      * Search for freelancers by skills
      * @param skillQuery The skill to search for
      * @return List of freelancers matching the skill

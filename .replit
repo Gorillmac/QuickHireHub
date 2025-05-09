@@ -1,7 +1,8 @@
-modules = ["java"]
+modules = ["java", "java-17"]
 
 [nix]
 channel = "stable-24_05"
+packages = ["jdk17", "maven"]
 
 [workflows]
 runButton = "Project"
@@ -21,8 +22,12 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd src && javac -classpath .:../lib/* -d ../target ./main/java/com/quickhire/**/*.java && cd .. && java -cp target:lib/* org.apache.catalina.startup.Bootstrap start"
+args = "mvn clean compile && java -cp target/classes:$(mvn dependency:build-classpath -Dmdep.outputFile=/dev/stdout -q) com.quickhire.JettyServer"
 waitForPort = 5000
 
 [deployment]
-run = ["sh", "-c", "cd src && javac -classpath .:../lib/* -d ../target ./main/java/com/quickhire/**/*.java && cd .. && java -cp target:lib/* org.apache.catalina.startup.Bootstrap start"]
+run = ["sh", "-c", "mvn clean compile && java -cp target/classes:$(mvn dependency:build-classpath -Dmdep.outputFile=/dev/stdout -q) com.quickhire.JettyServer"]
+
+[[ports]]
+localPort = 5000
+externalPort = 80

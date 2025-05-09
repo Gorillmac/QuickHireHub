@@ -1,6 +1,8 @@
 package com.quickhire.model;
 
 import java.sql.Timestamp;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Report entity class representing abuse reports in the system
@@ -23,6 +25,9 @@ public class Report {
     private int adminId; // Admin who handled the report
     private Timestamp createdAt;
     private Timestamp resolvedAt;
+    
+    // Attributes map for storing related objects
+    private Map<String, Object> attributes = new HashMap<>();
     
     // Default constructor
     public Report() {
@@ -131,6 +136,27 @@ public class Report {
     
     public void setResolvedAt(Timestamp resolvedAt) {
         this.resolvedAt = resolvedAt;
+    }
+    
+    // Attribute methods for storing related objects
+    public void setAttribute(String key, Object value) {
+        attributes.put(key, value);
+    }
+    
+    public Object getAttribute(String key) {
+        return attributes.get(key);
+    }
+    
+    public User getReporter() {
+        return (User) getAttribute("reporter");
+    }
+    
+    public User getReportedUser() {
+        return (User) getAttribute("reportedUser");
+    }
+    
+    public User getAdmin() {
+        return (User) getAttribute("admin");
     }
     
     // Helper methods

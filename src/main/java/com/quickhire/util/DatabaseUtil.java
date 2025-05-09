@@ -1,8 +1,11 @@
 package com.quickhire.util;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 
 /**
  * Utility class for database connections
@@ -12,12 +15,12 @@ public class DatabaseUtil {
     private static final String DRIVER = "org.postgresql.Driver";
     
     // Database connection parameters from environment variables
-    private static final String URL = System.getenv("DATABASE_URL");
-    private static final String HOST = System.getenv("PGHOST");
-    private static final String DATABASE = System.getenv("PGDATABASE");
-    private static final String USER = System.getenv("PGUSER");
-    private static final String PASSWORD = System.getenv("PGPASSWORD");
-    private static final String PORT = System.getenv("PGPORT");
+    private static final String DATABASE_URL = System.getenv("DATABASE_URL");
+    private static final String PGHOST = System.getenv("PGHOST");
+    private static final String PGDATABASE = System.getenv("PGDATABASE");
+    private static final String PGUSER = System.getenv("PGUSER");
+    private static final String PGPASSWORD = System.getenv("PGPASSWORD");
+    private static final String PGPORT = System.getenv("PGPORT");
     
     /**
      * Get a connection to the database
@@ -28,18 +31,65 @@ public class DatabaseUtil {
         try {
             Class.forName(DRIVER);
             
-            // If DATABASE_URL is provided, use it
-            if (URL != null && !URL.isEmpty()) {
-                return DriverManager.getConnection(URL);
+            // Method 1: Try using the Replit PostgreSQL environment variables
+            if (PGHOST != null && PGDATABASE != null && PGUSER != null && PGPASSWORD != null) {
+                String pgPort = PGPORT != null ? PGPORT : "5432";
+                String url = String.format("jdbc:postgresql://%s:%s/%s", PGHOST, pgPort, PGDATABASE);
+                
+                System.out.println("Connecting using PGHOST environment variables: " + url);
+                return DriverManager.getConnection(url, PGUSER, PGPASSWORD);
             }
             
-            // Otherwise, build connection string from individual parameters
-            String connectionUrl = String.format("jdbc:postgresql://%s:%s/%s", 
-                    HOST, PORT, DATABASE);
+            // Method 2: Try to parse DATABASE_URL if it exists
+            if (DATABASE_URL != null && !DATABASE_URL.isEmpty()) {
+                try {
+                    // Parse the DATABASE_URL to extract components
+                    URI dbUri = new URI(DATABASE_URL);
+                    
+                    String username = null;
+                    String password = null;
+                    String userInfo = dbUri.getUserInfo();
+                    
+                    if (userInfo != null) {
+                        String[] userInfoParts = userInfo.split(":");
+                        username = userInfoParts[0];
+                        if (userInfoParts.length > 1) {
+                            password = userInfoParts[1];
+                        }
+                    }
+                    
+                    String dbUrl = "jdbc:postgresql://" + dbUri.getHost();
+                    
+                    if (dbUri.getPort() != -1) {
+                        dbUrl += ":" + dbUri.getPort();
+                    }
+                    
+                    dbUrl += dbUri.getPath();
+                    
+                    // Add parameters
+                    String query = dbUri.getQuery();
+                    if (query != null && !query.isEmpty()) {
+                        dbUrl += "?" + query;
+                    }
+                    
+                    System.out.println("Connecting with parsed DATABASE_URL: " + dbUrl);
+                    
+                    // Create connection
+                    Properties props = new Properties();
+                    if (username != null) props.setProperty("user", username);
+                    if (password != null) props.setProperty("password", password);
+                    
+                    return DriverManager.getConnection(dbUrl, props);
+                } catch (URISyntaxException e) {
+                    throw new SQLException("Invalid DATABASE_URL format: " + e.getMessage(), e);
+                }
+            }
             
-            return DriverManager.getConnection(connectionUrl, USER, PASSWORD);
+            // If we get here, we couldn't establish a connection
+            throw new SQLException("No database connection information available");
+            
         } catch (ClassNotFoundException e) {
-            throw new SQLException("Database driver not found", e);
+            throw new SQLException("PostgreSQL JDBC driver not found", e);
         } catch (SQLException e) {
             throw new SQLException("Database connection error: " + e.getMessage(), e);
         }

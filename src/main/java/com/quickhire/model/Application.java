@@ -2,6 +2,8 @@ package com.quickhire.model;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Application entity class representing job applications
@@ -24,6 +26,9 @@ public class Application {
     private String status;
     private Timestamp appliedAt;
     private Timestamp updatedAt;
+    
+    // Attributes map for storing related objects
+    private Map<String, Object> attributes = new HashMap<>();
     
     // Default constructor
     public Application() {
@@ -124,6 +129,27 @@ public class Application {
     
     public void setUpdatedAt(Timestamp updatedAt) {
         this.updatedAt = updatedAt;
+    }
+    
+    // Attribute methods for storing related objects
+    public void setAttribute(String key, Object value) {
+        attributes.put(key, value);
+    }
+    
+    public Object getAttribute(String key) {
+        return attributes.get(key);
+    }
+    
+    public Job getJob() {
+        return (Job) getAttribute("job");
+    }
+    
+    public User getFreelancer() {
+        return (User) getAttribute("freelancer");
+    }
+    
+    public User getCompany() {
+        return (User) getAttribute("company");
     }
     
     // Helper methods
