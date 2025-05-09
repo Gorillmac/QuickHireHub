@@ -12,6 +12,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
 
 import com.quickhire.servlet.LoginServlet;
+import com.quickhire.servlet.LogoutServlet;
 import com.quickhire.servlet.RegisterServlet;
 import jakarta.servlet.DispatcherType;
 
@@ -38,6 +39,7 @@ public class StaticServer {
         // Register servlets
         servletHandler.addServlet(new ServletHolder(new LoginServlet()), "/login");
         servletHandler.addServlet(new ServletHolder(new RegisterServlet()), "/register");
+        servletHandler.addServlet(new ServletHolder(new LogoutServlet()), "/logout");
         
         // Create a resource handler for static content
         ResourceHandler resourceHandler = new ResourceHandler();
