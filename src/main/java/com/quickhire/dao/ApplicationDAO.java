@@ -250,7 +250,7 @@ public class ApplicationDAO {
             ps.setBigDecimal(2, application.getProposedRate());
             ps.setInt(3, application.getEstimatedDuration());
             ps.setString(4, application.getStatus());
-            ps.setInt(5, application.getId());
+            ps.setObject(5, application.getId());
             
             int affectedRows = ps.executeUpdate();
             if (affectedRows == 0) {
@@ -271,7 +271,7 @@ public class ApplicationDAO {
      * @return true if successful, false otherwise
      * @throws SQLException If a database error occurs
      */
-    public boolean updateStatus(int id, String status) throws SQLException {
+    public boolean updateStatus(UUID id, String status) throws SQLException {
         Connection conn = null;
         PreparedStatement ps = null;
         
@@ -282,7 +282,7 @@ public class ApplicationDAO {
             
             ps = conn.prepareStatement(sql);
             ps.setString(1, status);
-            ps.setInt(2, id);
+            ps.setObject(2, id);
             
             int affectedRows = ps.executeUpdate();
             
@@ -299,7 +299,7 @@ public class ApplicationDAO {
      * @return true if successful, false otherwise
      * @throws SQLException If a database error occurs
      */
-    public boolean delete(int id) throws SQLException {
+    public boolean delete(UUID id) throws SQLException {
         Connection conn = null;
         PreparedStatement ps = null;
         
@@ -309,7 +309,7 @@ public class ApplicationDAO {
             String sql = "DELETE FROM applications WHERE id = ?";
             
             ps = conn.prepareStatement(sql);
-            ps.setInt(1, id);
+            ps.setObject(1, id);
             
             int affectedRows = ps.executeUpdate();
             
@@ -328,9 +328,9 @@ public class ApplicationDAO {
      */
     private Application extractApplicationFromResultSet(ResultSet rs) throws SQLException {
         Application application = new Application();
-        application.setId(rs.getInt("id"));
-        application.setJobId(rs.getInt("job_id"));
-        application.setFreelancerId(rs.getInt("freelancer_id"));
+        application.setId((UUID) rs.getObject("id"));
+        application.setJobId((UUID) rs.getObject("job_id"));
+        application.setFreelancerId((UUID) rs.getObject("freelancer_id"));
         application.setCoverLetter(rs.getString("cover_letter"));
         application.setProposedRate(rs.getBigDecimal("proposed_rate"));
         application.setEstimatedDuration(rs.getInt("estimated_duration"));

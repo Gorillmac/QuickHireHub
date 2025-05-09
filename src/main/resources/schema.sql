@@ -2,7 +2,7 @@
 
 -- Users table
 CREATE TABLE IF NOT EXISTS users (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
@@ -22,8 +22,8 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- Jobs table
 CREATE TABLE IF NOT EXISTS jobs (
-    id SERIAL PRIMARY KEY,
-    company_id INTEGER NOT NULL REFERENCES users(id),
+    id UUID PRIMARY KEY,
+    company_id UUID NOT NULL REFERENCES users(id),
     title VARCHAR(100) NOT NULL,
     description TEXT NOT NULL,
     requirements TEXT,
@@ -40,9 +40,9 @@ CREATE TABLE IF NOT EXISTS jobs (
 
 -- Applications table
 CREATE TABLE IF NOT EXISTS applications (
-    id SERIAL PRIMARY KEY,
-    job_id INTEGER NOT NULL REFERENCES jobs(id),
-    freelancer_id INTEGER NOT NULL REFERENCES users(id),
+    id UUID PRIMARY KEY,
+    job_id UUID NOT NULL REFERENCES jobs(id),
+    freelancer_id UUID NOT NULL REFERENCES users(id),
     cover_letter TEXT NOT NULL,
     proposed_rate DECIMAL(10, 2) NOT NULL,
     estimated_duration INTEGER NOT NULL,
@@ -54,10 +54,10 @@ CREATE TABLE IF NOT EXISTS applications (
 
 -- Messages table
 CREATE TABLE IF NOT EXISTS messages (
-    id SERIAL PRIMARY KEY,
-    sender_id INTEGER NOT NULL REFERENCES users(id),
-    receiver_id INTEGER NOT NULL REFERENCES users(id),
-    job_id INTEGER REFERENCES jobs(id),
+    id UUID PRIMARY KEY,
+    sender_id UUID NOT NULL REFERENCES users(id),
+    receiver_id UUID NOT NULL REFERENCES users(id),
+    job_id UUID REFERENCES jobs(id),
     content TEXT NOT NULL,
     read BOOLEAN NOT NULL DEFAULT FALSE,
     sent_at TIMESTAMP NOT NULL DEFAULT NOW()
