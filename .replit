@@ -1,4 +1,4 @@
-modules = ["java", "java-17", "postgresql-16"]
+modules = ["java", "java-17", "postgresql-16", "nodejs-20"]
 
 [nix]
 channel = "stable-24_05"
@@ -14,15 +14,15 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "QuickHire Web Server"
+args = "Static Web Server"
 
 [[workflows.workflow]]
-name = "QuickHire Web Server"
+name = "Static Web Server"
 author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "java -cp \"$(mvn dependency:build-classpath -Dmdep.outputFile=/dev/stdout -q):target/classes\" com.quickhire.StaticServer"
+args = "npx http-server src/main/webapp -p 5000 --cors"
 waitForPort = 5000
 
 [deployment]
