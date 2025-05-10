@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import jakarta.servlet.ServletException;
@@ -250,7 +251,8 @@ public class JobServlet extends HttpServlet {
      */
     private void viewJobDetails(HttpServletRequest request, HttpServletResponse response, UUID jobId) 
             throws ServletException, IOException, SQLException {
-        Job job = jobDAO.findById(jobId);
+        Optional<Job> jobOptional = jobDAO.findById(jobId);
+        Job job = jobOptional.orElse(null);
         
         if (job == null) {
             response.sendRedirect(request.getContextPath() + "/jobs");
@@ -279,7 +281,8 @@ public class JobServlet extends HttpServlet {
     private void showEditJobForm(HttpServletRequest request, HttpServletResponse response, UUID jobId) 
             throws ServletException, IOException, SQLException {
         User company = AuthUtil.getUserFromSession(request);
-        Job job = jobDAO.findById(jobId);
+        Optional<Job> jobOptional = jobDAO.findById(jobId);
+        Job job = jobOptional.orElse(null);
         
         if (job == null || !job.getCompanyId().equals(company.getId())) {
             response.sendRedirect(request.getContextPath() + "/dashboard-company");

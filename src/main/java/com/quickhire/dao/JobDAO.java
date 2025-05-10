@@ -308,6 +308,16 @@ public class JobDAO {
     }
     
     /**
+     * Close a job (change its status to 'closed')
+     * 
+     * @param id The ID of the job to close
+     * @return true if the job was closed successfully, false otherwise
+     */
+    public boolean closeJob(UUID id) {
+        return updateStatus(id, "closed");
+    }
+    
+    /**
      * Map a ResultSet to a Job object
      * 
      * @param rs The ResultSet containing job data
