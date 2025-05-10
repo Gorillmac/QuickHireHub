@@ -181,9 +181,9 @@ public class ApplicationServlet extends HttpServlet {
                 }
                 
                 try {
-                    int jobId = Integer.parseInt(pathInfo.substring(1));
+                    UUID jobId = UUID.fromString(pathInfo.substring(1));
                     createApplication(request, response, jobId);
-                } catch (NumberFormatException e) {
+                } catch (IllegalArgumentException e) {
                     response.sendRedirect(request.getContextPath() + "/jobs");
                 }
             } else {
@@ -197,7 +197,7 @@ public class ApplicationServlet extends HttpServlet {
     /**
      * Show application form for a job
      */
-    private void showApplicationForm(HttpServletRequest request, HttpServletResponse response, int jobId) 
+    private void showApplicationForm(HttpServletRequest request, HttpServletResponse response, UUID jobId) 
             throws ServletException, IOException, SQLException {
         User freelancer = AuthUtil.getUserFromSession(request);
         
@@ -217,7 +217,7 @@ public class ApplicationServlet extends HttpServlet {
         }
         
         // Get company details
-        User company = userDAO.findById(job.getCompanyId());
+        User company = userDAO.findById(job.getCompanyId()).orElse(null);
         
         request.setAttribute("job", job);
         request.setAttribute("company", company);
@@ -227,7 +227,7 @@ public class ApplicationServlet extends HttpServlet {
     /**
      * Create a new application
      */
-    private void createApplication(HttpServletRequest request, HttpServletResponse response, int jobId) 
+    private void createApplication(HttpServletRequest request, HttpServletResponse response, UUID jobId) 
             throws ServletException, IOException, SQLException {
         User freelancer = AuthUtil.getUserFromSession(request);
         
@@ -314,7 +314,7 @@ public class ApplicationServlet extends HttpServlet {
     /**
      * View application details
      */
-    private void viewApplicationDetails(HttpServletRequest request, HttpServletResponse response, int applicationId) 
+    private void viewApplicationDetails(HttpServletRequest request, HttpServletResponse response, UUID applicationId) 
             throws ServletException, IOException, SQLException {
         User user = AuthUtil.getUserFromSession(request);
         Application application = applicationDAO.findById(applicationId);
@@ -326,13 +326,13 @@ public class ApplicationServlet extends HttpServlet {
         
         // Get job and company details
         Job job = jobDAO.findById(application.getJobId());
-        User company = userDAO.findById(job.getCompanyId());
-        User freelancer = userDAO.findById(application.getFreelancerId());
+        User company = userDAO.findById(job.getCompanyId()).orElse(null);
+        User freelancer = userDAO.findById(application.getFreelancerId()).orElse(null);
         
         // Check if user has permission to view this application
         boolean hasPermission = user.isAdmin() || 
-                               (user.isFreelancer() && user.getId() == application.getFreelancerId()) || 
-                               (user.isCompany() && user.getId() == job.getCompanyId());
+                               (user.isFreelancer() && user.getId().equals(application.getFreelancerId())) || 
+                               (user.isCompany() && user.getId().equals(job.getCompanyId()));
         
         if (!hasPermission) {
             response.sendRedirect(request.getContextPath() + "/");
@@ -349,12 +349,12 @@ public class ApplicationServlet extends HttpServlet {
     /**
      * Withdraw an application
      */
-    private void withdrawApplication(HttpServletRequest request, HttpServletResponse response, int applicationId) 
+    private void withdrawApplication(HttpServletRequest request, HttpServletResponse response, UUID applicationId) 
             throws ServletException, IOException, SQLException {
         User freelancer = AuthUtil.getUserFromSession(request);
         Application application = applicationDAO.findById(applicationId);
         
-        if (application == null || application.getFreelancerId() != freelancer.getId()) {
+        if (application == null || !application.getFreelancerId().equals(freelancer.getId())) {
             response.sendRedirect(request.getContextPath() + "/dashboard-freelancer");
             return;
         }
@@ -377,7 +377,7 @@ public class ApplicationServlet extends HttpServlet {
     /**
      * Accept an application
      */
-    private void acceptApplication(HttpServletRequest request, HttpServletResponse response, int applicationId) 
+    private void acceptApplication(HttpServletRequest request, HttpServletResponse response, UUID applicationId) 
             throws ServletException, IOException, SQLException {
         User company = AuthUtil.getUserFromSession(request);
         Application application = applicationDAO.findById(applicationId);
@@ -390,7 +390,7 @@ public class ApplicationServlet extends HttpServlet {
         // Get job details
         Job job = jobDAO.findById(application.getJobId());
         
-        if (job == null || job.getCompanyId() != company.getId()) {
+        if (job == null || !job.getCompanyId().equals(company.getId())) {
             response.sendRedirect(request.getContextPath() + "/dashboard-company");
             return;
         }
@@ -408,7 +408,7 @@ public class ApplicationServlet extends HttpServlet {
         // Get other applications for this job and reject them
         List<Application> otherApplications = applicationDAO.findByJobId(job.getId());
         for (Application other : otherApplications) {
-            if (other.getId() != applicationId && other.isPending()) {
+            if (!other.getId().equals(applicationId) && other.isPending()) {
                 applicationDAO.updateStatus(other.getId(), Application.STATUS_REJECTED);
             }
         }
