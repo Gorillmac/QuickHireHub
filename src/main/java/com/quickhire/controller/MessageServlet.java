@@ -3,6 +3,7 @@ package com.quickhire.controller;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.UUID;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -69,9 +70,9 @@ public class MessageServlet extends HttpServlet {
                     }
                     
                     try {
-                        int userId = Integer.parseInt(conversationPathInfo.substring(1));
-                        showConversation(request, response, userId, 0); // 0 means no job context
-                    } catch (NumberFormatException e) {
+                        UUID userId = UUID.fromString(conversationPathInfo.substring(1));
+                        showConversation(request, response, userId, null); // null means no job context
+                    } catch (IllegalArgumentException e) {
                         response.sendRedirect(request.getContextPath() + "/messages");
                     }
                     break;
@@ -92,10 +93,10 @@ public class MessageServlet extends HttpServlet {
                     }
                     
                     try {
-                        int userId = Integer.parseInt(parts[0]);
-                        int jobId = Integer.parseInt(parts[1]);
+                        UUID userId = UUID.fromString(parts[0]);
+                        UUID jobId = UUID.fromString(parts[1]);
                         showConversation(request, response, userId, jobId);
-                    } catch (NumberFormatException e) {
+                    } catch (IllegalArgumentException e) {
                         response.sendRedirect(request.getContextPath() + "/messages");
                     }
                     break;
@@ -157,9 +158,9 @@ public class MessageServlet extends HttpServlet {
      * Show conversation with a specific user
      */
     private void showConversation(HttpServletRequest request, HttpServletResponse response, 
-            int otherUserId, int jobId) throws ServletException, IOException, SQLException {
+            UUID otherUserId, UUID jobId) throws ServletException, IOException, SQLException {
         User currentUser = AuthUtil.getUserFromSession(request);
-        User otherUser = userDAO.findById(otherUserId);
+        User otherUser = userDAO.findById(otherUserId).orElse(null);
         
         if (otherUser == null) {
             response.sendRedirect(request.getContextPath() + "/messages");
@@ -169,7 +170,7 @@ public class MessageServlet extends HttpServlet {
         List<Message> conversation;
         Job job = null;
         
-        if (jobId > 0) {
+        if (jobId != null) {
             // Get job-specific conversation
             conversation = messageDAO.getJobConversation(currentUser.getId(), otherUserId, jobId);
             job = jobDAO.findById(jobId);
@@ -218,12 +219,12 @@ public class MessageServlet extends HttpServlet {
         }
         
         try {
-            int receiverId = Integer.parseInt(receiverIdStr);
+            UUID receiverId = UUID.fromString(receiverIdStr);
             
             // Check if receiver exists
-            User receiver = userDAO.findById(receiverId);
+            User receiver = userDAO.findById(receiverId).orElse(null);
             if (receiver == null) {
-                throw new NumberFormatException("Invalid receiver");
+                throw new IllegalArgumentException("Invalid receiver");
             }
             
             // Create message object
@@ -236,13 +237,13 @@ public class MessageServlet extends HttpServlet {
             // Add job context if provided
             if (jobIdStr != null && !jobIdStr.trim().isEmpty()) {
                 try {
-                    int jobId = Integer.parseInt(jobIdStr);
+                    UUID jobId = UUID.fromString(jobIdStr);
                     Job job = jobDAO.findById(jobId);
                     
                     if (job != null) {
                         message.setJobId(jobId);
                     }
-                } catch (NumberFormatException e) {
+                } catch (IllegalArgumentException e) {
                     // Invalid job ID, ignore
                 }
             }
@@ -259,7 +260,7 @@ public class MessageServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/messages/conversation/" + receiverId);
             }
             
-        } catch (NumberFormatException e) {
+        } catch (IllegalArgumentException e) {
             request.getSession().setAttribute("errorMessage", "Invalid recipient");
             
             if (redirect != null && !redirect.isEmpty()) {

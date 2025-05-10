@@ -421,7 +421,7 @@ public class ApplicationServlet extends HttpServlet {
     /**
      * Reject an application
      */
-    private void rejectApplication(HttpServletRequest request, HttpServletResponse response, int applicationId) 
+    private void rejectApplication(HttpServletRequest request, HttpServletResponse response, UUID applicationId) 
             throws ServletException, IOException, SQLException {
         User company = AuthUtil.getUserFromSession(request);
         Application application = applicationDAO.findById(applicationId);
@@ -434,7 +434,7 @@ public class ApplicationServlet extends HttpServlet {
         // Get job details
         Job job = jobDAO.findById(application.getJobId());
         
-        if (job == null || job.getCompanyId() != company.getId()) {
+        if (job == null || !job.getCompanyId().equals(company.getId())) {
             response.sendRedirect(request.getContextPath() + "/dashboard-company");
             return;
         }
