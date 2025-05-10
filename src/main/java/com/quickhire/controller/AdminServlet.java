@@ -72,7 +72,7 @@ public class AdminServlet extends HttpServlet {
                             UUID jobId = UUID.fromString(approvePathInfo.substring(1));
                             approveJob(request, response, jobId);
                             return;
-                        } catch (NumberFormatException e) {
+                        } catch (IllegalArgumentException e) {
                             // Invalid job ID, continue to dashboard
                         }
                     }
@@ -84,10 +84,10 @@ public class AdminServlet extends HttpServlet {
                     String rejectPathInfo = request.getPathInfo();
                     if (rejectPathInfo != null && !rejectPathInfo.equals("/")) {
                         try {
-                            int jobId = Integer.parseInt(rejectPathInfo.substring(1));
+                            UUID jobId = UUID.fromString(rejectPathInfo.substring(1));
                             rejectJob(request, response, jobId);
                             return;
-                        } catch (NumberFormatException e) {
+                        } catch (IllegalArgumentException e) {
                             // Invalid job ID, continue to dashboard
                         }
                     }
@@ -104,10 +104,10 @@ public class AdminServlet extends HttpServlet {
                     String userPathInfo = request.getPathInfo();
                     if (userPathInfo != null && !userPathInfo.equals("/")) {
                         try {
-                            int userId = Integer.parseInt(userPathInfo.substring(1));
+                            UUID userId = UUID.fromString(userPathInfo.substring(1));
                             toggleUserStatus(request, response, userId);
                             return;
-                        } catch (NumberFormatException e) {
+                        } catch (IllegalArgumentException e) {
                             // Invalid user ID, continue to users list
                         }
                     }
@@ -176,7 +176,7 @@ public class AdminServlet extends HttpServlet {
     /**
      * Approve a job
      */
-    private void approveJob(HttpServletRequest request, HttpServletResponse response, int jobId) 
+    private void approveJob(HttpServletRequest request, HttpServletResponse response, UUID jobId) 
             throws ServletException, IOException, SQLException {
         jobDAO.approveJob(jobId);
         
