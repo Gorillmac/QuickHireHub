@@ -284,7 +284,7 @@ public class JobServlet extends HttpServlet {
         Optional<Job> jobOptional = jobDAO.findById(jobId);
         Job job = jobOptional.orElse(null);
         
-        if (job == null || !job.getCompanyId().equals(company.getId())) {
+        if (job == null || !job.getClientId().equals(company.getId())) {
             response.sendRedirect(request.getContextPath() + "/dashboard-company");
             return;
         }
@@ -369,9 +369,10 @@ public class JobServlet extends HttpServlet {
     private void updateJob(HttpServletRequest request, HttpServletResponse response, UUID jobId) 
             throws ServletException, IOException, SQLException {
         User company = AuthUtil.getUserFromSession(request);
-        Job job = jobDAO.findById(jobId);
+        Optional<Job> jobOptional = jobDAO.findById(jobId);
+        Job job = jobOptional.orElse(null);
         
-        if (job == null || !job.getCompanyId().equals(company.getId())) {
+        if (job == null || !job.getClientId().equals(company.getId())) {
             response.sendRedirect(request.getContextPath() + "/dashboard-company");
             return;
         }
@@ -440,9 +441,10 @@ public class JobServlet extends HttpServlet {
     private void closeJob(HttpServletRequest request, HttpServletResponse response, UUID jobId) 
             throws ServletException, IOException, SQLException {
         User company = AuthUtil.getUserFromSession(request);
-        Job job = jobDAO.findById(jobId);
+        Optional<Job> jobOptional = jobDAO.findById(jobId);
+        Job job = jobOptional.orElse(null);
         
-        if (job == null || !job.getCompanyId().equals(company.getId())) {
+        if (job == null || !job.getClientId().equals(company.getId())) {
             response.sendRedirect(request.getContextPath() + "/dashboard-company");
             return;
         }
@@ -481,7 +483,8 @@ public class JobServlet extends HttpServlet {
         
         // For each application, get the job details
         for (Application application : applications) {
-            Job job = jobDAO.findById(application.getJobId());
+            Optional<Job> jobOptional = jobDAO.findById(application.getJobId());
+            Job job = jobOptional.orElse(null);
             application.setAttribute("job", job);
             
             if (job != null) {
