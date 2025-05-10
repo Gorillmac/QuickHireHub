@@ -3,6 +3,7 @@ package com.quickhire.controller;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.UUID;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -71,10 +72,10 @@ public class ReviewServlet extends HttpServlet {
                 }
                 
                 try {
-                    int userId = Integer.parseInt(parts[0]);
-                    int jobId = Integer.parseInt(parts[1]);
-                    showReviewForm(request, response, userId, jobId);
-                } catch (NumberFormatException e) {
+                    UUID reviewedUserId = UUID.fromString(parts[0]);
+                    UUID jobId = UUID.fromString(parts[1]);
+                    showReviewForm(request, response, reviewedUserId, jobId);
+                } catch (IllegalArgumentException e) {
                     response.sendRedirect(request.getContextPath() + "/");
                 }
             } else if ("/reviews/user".equals(path)) {
@@ -86,9 +87,9 @@ public class ReviewServlet extends HttpServlet {
                 }
                 
                 try {
-                    int userId = Integer.parseInt(pathInfo.substring(1));
+                    UUID userId = UUID.fromString(pathInfo.substring(1));
                     showUserReviews(request, response, userId);
-                } catch (NumberFormatException e) {
+                } catch (IllegalArgumentException e) {
                     response.sendRedirect(request.getContextPath() + "/");
                 }
             } else {
@@ -126,9 +127,9 @@ public class ReviewServlet extends HttpServlet {
      * Show review creation form
      */
     private void showReviewForm(HttpServletRequest request, HttpServletResponse response, 
-            int reviewedUserId, int jobId) throws ServletException, IOException, SQLException {
+            UUID reviewedUserId, UUID jobId) throws ServletException, IOException, SQLException {
         User reviewer = AuthUtil.getUserFromSession(request);
-        User reviewedUser = userDAO.findById(reviewedUserId);
+        User reviewedUser = userDAO.findById(reviewedUserId).orElse(null);
         Job job = jobDAO.findById(jobId);
         
         if (reviewedUser == null || job == null) {
@@ -137,7 +138,7 @@ public class ReviewServlet extends HttpServlet {
         }
         
         // Cannot review yourself
-        if (reviewer.getId() == reviewedUserId) {
+        if (reviewer.getId().equals(reviewedUserId)) {
             response.sendRedirect(request.getContextPath() + "/");
             return;
         }
@@ -149,7 +150,7 @@ public class ReviewServlet extends HttpServlet {
             // Company can review freelancer if the freelancer has an accepted application for this job
             List<Application> applications = applicationDAO.findByJobId(jobId);
             for (Application app : applications) {
-                if (app.getFreelancerId() == reviewedUserId && app.isAccepted()) {
+                if (app.getFreelancerId().equals(reviewedUserId) && app.isAccepted()) {
                     canReview = true;
                     break;
                 }
@@ -158,7 +159,7 @@ public class ReviewServlet extends HttpServlet {
             // Freelancer can review company if they have an accepted application for this job
             List<Application> applications = applicationDAO.findByFreelancerId(reviewer.getId());
             for (Application app : applications) {
-                if (app.getJobId() == jobId && app.isAccepted()) {
+                if (app.getJobId().equals(jobId) && app.isAccepted()) {
                     canReview = true;
                     break;
                 }
@@ -203,12 +204,12 @@ public class ReviewServlet extends HttpServlet {
             
             if (reviewedUserIdStr != null && jobIdStr != null) {
                 try {
-                    int reviewedUserId = Integer.parseInt(reviewedUserIdStr);
-                    int jobId = Integer.parseInt(jobIdStr);
+                    UUID reviewedUserId = UUID.fromString(reviewedUserIdStr);
+                    UUID jobId = UUID.fromString(jobIdStr);
                     showReviewForm(request, response, reviewedUserId, jobId);
                     return;
-                } catch (NumberFormatException e) {
-                    // Invalid IDs, redirect to home
+                } catch (IllegalArgumentException e) {
+                    // Invalid UUIDs, redirect to home
                 }
             }
             
@@ -217,8 +218,8 @@ public class ReviewServlet extends HttpServlet {
         }
         
         try {
-            int reviewedUserId = Integer.parseInt(reviewedUserIdStr);
-            int jobId = Integer.parseInt(jobIdStr);
+            UUID reviewedUserId = UUID.fromString(reviewedUserIdStr);
+            UUID jobId = UUID.fromString(jobIdStr);
             int rating = Integer.parseInt(ratingStr);
             
             // Validate rating
@@ -250,7 +251,7 @@ public class ReviewServlet extends HttpServlet {
             request.getSession().setAttribute("successMessage", "Review submitted successfully");
             response.sendRedirect(request.getContextPath() + "/reviews/user/" + reviewedUserId);
             
-        } catch (NumberFormatException e) {
+        } catch (IllegalArgumentException e) {
             response.sendRedirect(request.getContextPath() + "/");
         }
     }
@@ -258,9 +259,9 @@ public class ReviewServlet extends HttpServlet {
     /**
      * Show reviews for a user
      */
-    private void showUserReviews(HttpServletRequest request, HttpServletResponse response, int userId) 
+    private void showUserReviews(HttpServletRequest request, HttpServletResponse response, UUID userId) 
             throws ServletException, IOException, SQLException {
-        User user = userDAO.findById(userId);
+        User user = userDAO.findById(userId).orElse(null);
         
         if (user == null) {
             response.sendRedirect(request.getContextPath() + "/");
@@ -272,7 +273,7 @@ public class ReviewServlet extends HttpServlet {
         
         // Get reviewer details for each review
         for (Review review : reviews) {
-            User reviewer = userDAO.findById(review.getReviewerId());
+            User reviewer = userDAO.findById(review.getReviewerId()).orElse(null);
             Job job = jobDAO.findById(review.getJobId());
             
             review.setAttribute("reviewer", reviewer);

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.UUID;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -70,9 +71,9 @@ public class ApplicationServlet extends HttpServlet {
                 }
                 
                 try {
-                    int jobId = Integer.parseInt(pathInfo.substring(1));
+                    UUID jobId = UUID.fromString(pathInfo.substring(1));
                     showApplicationForm(request, response, jobId);
-                } catch (NumberFormatException e) {
+                } catch (IllegalArgumentException e) {
                     response.sendRedirect(request.getContextPath() + "/jobs");
                 }
             } else if ("/applications/view".equals(path)) {
@@ -84,9 +85,9 @@ public class ApplicationServlet extends HttpServlet {
                 }
                 
                 try {
-                    int applicationId = Integer.parseInt(pathInfo.substring(1));
+                    UUID applicationId = UUID.fromString(pathInfo.substring(1));
                     viewApplicationDetails(request, response, applicationId);
-                } catch (NumberFormatException e) {
+                } catch (IllegalArgumentException e) {
                     response.sendRedirect(request.getContextPath() + "/dashboard-freelancer");
                 }
             } else if ("/applications/withdraw".equals(path)) {
@@ -103,9 +104,9 @@ public class ApplicationServlet extends HttpServlet {
                 }
                 
                 try {
-                    int applicationId = Integer.parseInt(pathInfo.substring(1));
+                    UUID applicationId = UUID.fromString(pathInfo.substring(1));
                     withdrawApplication(request, response, applicationId);
-                } catch (NumberFormatException e) {
+                } catch (IllegalArgumentException e) {
                     response.sendRedirect(request.getContextPath() + "/dashboard-freelancer");
                 }
             } else if ("/applications/accept".equals(path)) {
@@ -122,9 +123,9 @@ public class ApplicationServlet extends HttpServlet {
                 }
                 
                 try {
-                    int applicationId = Integer.parseInt(pathInfo.substring(1));
+                    UUID applicationId = UUID.fromString(pathInfo.substring(1));
                     acceptApplication(request, response, applicationId);
-                } catch (NumberFormatException e) {
+                } catch (IllegalArgumentException e) {
                     response.sendRedirect(request.getContextPath() + "/dashboard-company");
                 }
             } else if ("/applications/reject".equals(path)) {
@@ -141,9 +142,9 @@ public class ApplicationServlet extends HttpServlet {
                 }
                 
                 try {
-                    int applicationId = Integer.parseInt(pathInfo.substring(1));
+                    UUID applicationId = UUID.fromString(pathInfo.substring(1));
                     rejectApplication(request, response, applicationId);
-                } catch (NumberFormatException e) {
+                } catch (IllegalArgumentException e) {
                     response.sendRedirect(request.getContextPath() + "/dashboard-company");
                 }
             } else {
