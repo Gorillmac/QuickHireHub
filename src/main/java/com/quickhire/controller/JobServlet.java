@@ -260,7 +260,7 @@ public class JobServlet extends HttpServlet {
         }
         
         // Get company details
-        User company = userDAO.findById(job.getCompanyId());
+        User company = userDAO.findById(job.getClientId());
         
         // Check if the current user has applied for this job
         boolean hasApplied = false;
@@ -335,7 +335,7 @@ public class JobServlet extends HttpServlet {
         
         // Create job object
         Job job = new Job();
-        job.setCompanyId(company.getId());
+        job.setClientId(company.getId());
         job.setTitle(title);
         job.setDescription(description);
         job.setRequirements(requirements);
@@ -465,7 +465,7 @@ public class JobServlet extends HttpServlet {
         User company = AuthUtil.getUserFromSession(request);
         
         // Get all jobs posted by the company
-        List<Job> jobs = jobDAO.findByCompanyId(company.getId());
+        List<Job> jobs = jobDAO.findByClientId(company.getId());
         
         request.setAttribute("jobs", jobs);
         request.getRequestDispatcher("/dashboard-company.jsp").forward(request, response);
@@ -488,7 +488,7 @@ public class JobServlet extends HttpServlet {
             application.setAttribute("job", job);
             
             if (job != null) {
-                User company = userDAO.findById(job.getCompanyId());
+                User company = userDAO.findById(job.getClientId());
                 application.setAttribute("company", company);
             }
         }
