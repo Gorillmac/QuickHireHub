@@ -3,6 +3,8 @@ package com.quickhire.controller;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -67,7 +69,7 @@ public class AdminServlet extends HttpServlet {
                     String approvePathInfo = request.getPathInfo();
                     if (approvePathInfo != null && !approvePathInfo.equals("/")) {
                         try {
-                            int jobId = Integer.parseInt(approvePathInfo.substring(1));
+                            UUID jobId = UUID.fromString(approvePathInfo.substring(1));
                             approveJob(request, response, jobId);
                             return;
                         } catch (NumberFormatException e) {
