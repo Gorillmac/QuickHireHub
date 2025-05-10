@@ -281,7 +281,7 @@ public class JobServlet extends HttpServlet {
         User company = AuthUtil.getUserFromSession(request);
         Job job = jobDAO.findById(jobId);
         
-        if (job == null || job.getCompanyId() != company.getId()) {
+        if (job == null || !job.getCompanyId().equals(company.getId())) {
             response.sendRedirect(request.getContextPath() + "/dashboard-company");
             return;
         }
@@ -363,12 +363,12 @@ public class JobServlet extends HttpServlet {
     /**
      * Update an existing job
      */
-    private void updateJob(HttpServletRequest request, HttpServletResponse response, int jobId) 
+    private void updateJob(HttpServletRequest request, HttpServletResponse response, UUID jobId) 
             throws ServletException, IOException, SQLException {
         User company = AuthUtil.getUserFromSession(request);
         Job job = jobDAO.findById(jobId);
         
-        if (job == null || job.getCompanyId() != company.getId()) {
+        if (job == null || !job.getCompanyId().equals(company.getId())) {
             response.sendRedirect(request.getContextPath() + "/dashboard-company");
             return;
         }
@@ -434,12 +434,12 @@ public class JobServlet extends HttpServlet {
     /**
      * Close a job
      */
-    private void closeJob(HttpServletRequest request, HttpServletResponse response, int jobId) 
+    private void closeJob(HttpServletRequest request, HttpServletResponse response, UUID jobId) 
             throws ServletException, IOException, SQLException {
         User company = AuthUtil.getUserFromSession(request);
         Job job = jobDAO.findById(jobId);
         
-        if (job == null || job.getCompanyId() != company.getId()) {
+        if (job == null || !job.getCompanyId().equals(company.getId())) {
             response.sendRedirect(request.getContextPath() + "/dashboard-company");
             return;
         }
