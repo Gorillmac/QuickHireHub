@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.List;
+import java.util.UUID;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -91,9 +92,9 @@ public class JobServlet extends HttpServlet {
                     }
                     
                     try {
-                        int editJobId = Integer.parseInt(editPathInfo.substring(1));
+                        UUID editJobId = UUID.fromString(editPathInfo.substring(1));
                         showEditJobForm(request, response, editJobId);
-                    } catch (NumberFormatException e) {
+                    } catch (IllegalArgumentException e) {
                         response.sendRedirect(request.getContextPath() + "/jobs");
                     }
                     break;
@@ -107,9 +108,9 @@ public class JobServlet extends HttpServlet {
                     }
                     
                     try {
-                        int viewJobId = Integer.parseInt(viewPathInfo.substring(1));
+                        UUID viewJobId = UUID.fromString(viewPathInfo.substring(1));
                         viewJobDetails(request, response, viewJobId);
-                    } catch (NumberFormatException e) {
+                    } catch (IllegalArgumentException e) {
                         response.sendRedirect(request.getContextPath() + "/jobs");
                     }
                     break;
@@ -128,9 +129,9 @@ public class JobServlet extends HttpServlet {
                     }
                     
                     try {
-                        int closeJobId = Integer.parseInt(closePathInfo.substring(1));
+                        UUID closeJobId = UUID.fromString(closePathInfo.substring(1));
                         closeJob(request, response, closeJobId);
-                    } catch (NumberFormatException e) {
+                    } catch (IllegalArgumentException e) {
                         response.sendRedirect(request.getContextPath() + "/jobs");
                     }
                     break;
@@ -199,9 +200,9 @@ public class JobServlet extends HttpServlet {
                 }
                 
                 try {
-                    int editJobId = Integer.parseInt(editPathInfo.substring(1));
+                    UUID editJobId = UUID.fromString(editPathInfo.substring(1));
                     updateJob(request, response, editJobId);
-                } catch (NumberFormatException e) {
+                } catch (IllegalArgumentException e) {
                     response.sendRedirect(request.getContextPath() + "/jobs");
                 }
             } else if ("/jobs/search".equals(path)) {
@@ -247,7 +248,7 @@ public class JobServlet extends HttpServlet {
     /**
      * Show job details
      */
-    private void viewJobDetails(HttpServletRequest request, HttpServletResponse response, int jobId) 
+    private void viewJobDetails(HttpServletRequest request, HttpServletResponse response, UUID jobId) 
             throws ServletException, IOException, SQLException {
         Job job = jobDAO.findById(jobId);
         
@@ -275,7 +276,7 @@ public class JobServlet extends HttpServlet {
     /**
      * Show job edit form
      */
-    private void showEditJobForm(HttpServletRequest request, HttpServletResponse response, int jobId) 
+    private void showEditJobForm(HttpServletRequest request, HttpServletResponse response, UUID jobId) 
             throws ServletException, IOException, SQLException {
         User company = AuthUtil.getUserFromSession(request);
         Job job = jobDAO.findById(jobId);
