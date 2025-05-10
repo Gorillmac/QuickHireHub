@@ -285,6 +285,29 @@ public class JobDAO {
     }
     
     /**
+     * Approve a job (set approved status to true)
+     * 
+     * @param id The ID of the job to approve
+     * @return true if the job was approved successfully, false otherwise
+     */
+    public boolean approveJob(UUID id) {
+        String sql = "UPDATE jobs SET approved = true, updated_at = NOW() WHERE id = ?";
+        
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setObject(1, id);
+            
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+            
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error approving job", e);
+            return false;
+        }
+    }
+    
+    /**
      * Delete a job from the database
      * 
      * @param id The ID of the job to delete

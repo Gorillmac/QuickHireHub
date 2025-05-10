@@ -188,7 +188,7 @@ public class AdminServlet extends HttpServlet {
     /**
      * Reject a job (delete it)
      */
-    private void rejectJob(HttpServletRequest request, HttpServletResponse response, int jobId) 
+    private void rejectJob(HttpServletRequest request, HttpServletResponse response, UUID jobId) 
             throws ServletException, IOException, SQLException {
         jobDAO.delete(jobId);
         
@@ -210,9 +210,10 @@ public class AdminServlet extends HttpServlet {
     /**
      * Toggle user active status (suspend/activate)
      */
-    private void toggleUserStatus(HttpServletRequest request, HttpServletResponse response, int userId) 
+    private void toggleUserStatus(HttpServletRequest request, HttpServletResponse response, UUID userId) 
             throws ServletException, IOException, SQLException {
-        User user = userDAO.findById(userId);
+        Optional<User> userOptional = userDAO.findById(userId);
+        User user = userOptional.orElse(null);
         
         if (user == null) {
             response.sendRedirect(request.getContextPath() + "/admin/users");
