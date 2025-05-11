@@ -44,27 +44,58 @@ const server = http.createServer((req, res) => {
                     
                     try {
                         // First try parsing as JSON
-                        userData = JSON.parse(body);
-                    } catch (e) {
-                        // If that fails, try URL encoded format
-                        const formData = new URLSearchParams(body);
-                        
-                        // Determine which endpoint we're handling
-                        if (reqUrl.pathname === '/register') {
-                            userData = {
-                                firstName: formData.get('firstName'),
-                                lastName: formData.get('lastName'),
-                                email: formData.get('email'),
-                                password: formData.get('password'),
-                                userType: formData.get('userType')
-                            };
-                        } else if (reqUrl.pathname === '/login') {
-                            userData = {
-                                email: formData.get('email'),
-                                password: formData.get('password'),
-                                rememberMe: formData.get('rememberMe') === 'on'
-                            };
+                        try {
+                            userData = JSON.parse(body);
+                        } catch (e) {
+                            // Check if it's multipart form data
+                            if (body.includes('Content-Disposition: form-data')) {
+                                const boundaryMatch = req.headers['content-type'] ? req.headers['content-type'].match(/boundary=([^;]+)/) : null;
+                                
+                                if (boundaryMatch) {
+                                    const boundary = boundaryMatch[1];
+                                    const parts = body.split('--' + boundary);
+                                    
+                                    // Initialize userData object
+                                    userData = {};
+                                    
+                                    // Process each part
+                                    for (const part of parts) {
+                                        const nameMatch = part.match(/name="([^"]+)"/);
+                                        if (nameMatch) {
+                                            const name = nameMatch[1];
+                                            // Extract the value (everything after the double newline)
+                                            const value = part.split(/\r\n\r\n|\n\n/)[1]?.trim();
+                                            if (value) {
+                                                userData[name] = value;
+                                            }
+                                        }
+                                    }
+                                }
+                            } else {
+                                // If it's not multipart, try URL encoded format
+                                const formData = new URLSearchParams(body);
+                                
+                                // Determine which endpoint we're handling
+                                if (reqUrl.pathname === '/register') {
+                                    userData = {
+                                        firstName: formData.get('firstName'),
+                                        lastName: formData.get('lastName'),
+                                        email: formData.get('email'),
+                                        password: formData.get('password'),
+                                        userType: formData.get('userType')
+                                    };
+                                } else if (reqUrl.pathname === '/login') {
+                                    userData = {
+                                        email: formData.get('email'),
+                                        password: formData.get('password'),
+                                        rememberMe: formData.get('rememberMe') === 'on'
+                                    };
+                                }
+                            }
                         }
+                    } catch (parseError) {
+                        console.error(`[${new Date().toISOString()}] Error parsing request data:`, parseError);
+                        userData = {};
                     }
                     
                     // Log the captured data
