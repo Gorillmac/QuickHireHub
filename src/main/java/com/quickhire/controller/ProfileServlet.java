@@ -12,6 +12,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Servlet for handling user profile operations
@@ -141,8 +143,9 @@ public class ProfileServlet extends HttpServlet {
             throws ServletException, IOException, SQLException {
         
         try {
-            int userId = Integer.parseInt(userIdStr);
-            User freelancer = userDAO.findById(userId);
+            UUID userId = UUID.fromString(userIdStr);
+            Optional<User> freelancerOptional = userDAO.findById(userId);
+            User freelancer = freelancerOptional.orElse(null);
             
             if (freelancer != null && freelancer.isFreelancer() && freelancer.isActive()) {
                 request.setAttribute("freelancer", freelancer);
