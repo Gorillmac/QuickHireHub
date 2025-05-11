@@ -153,7 +153,7 @@ public class ProfileServlet extends HttpServlet {
             } else {
                 response.sendRedirect(request.getContextPath() + "/jobs");
             }
-        } catch (NumberFormatException e) {
+        } catch (IllegalArgumentException e) {
             response.sendRedirect(request.getContextPath() + "/jobs");
         }
     }
@@ -165,8 +165,9 @@ public class ProfileServlet extends HttpServlet {
             throws ServletException, IOException, SQLException {
         
         try {
-            int userId = Integer.parseInt(userIdStr);
-            User company = userDAO.findById(userId);
+            UUID userId = UUID.fromString(userIdStr);
+            Optional<User> companyOptional = userDAO.findById(userId);
+            User company = companyOptional.orElse(null);
             
             if (company != null && company.isCompany() && company.isActive()) {
                 request.setAttribute("company", company);
@@ -174,7 +175,7 @@ public class ProfileServlet extends HttpServlet {
             } else {
                 response.sendRedirect(request.getContextPath() + "/jobs");
             }
-        } catch (NumberFormatException e) {
+        } catch (IllegalArgumentException e) {
             response.sendRedirect(request.getContextPath() + "/jobs");
         }
     }
