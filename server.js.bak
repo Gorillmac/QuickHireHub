@@ -167,6 +167,7 @@ const server = http.createServer(async (req, res) => {
                 body += chunk.toString();
             });
             
+            // Using async function for the callback to use await inside
             req.on('end', async () => {
                 try {
                     // Parse the form data - try both JSON and URL encoded formats
@@ -532,318 +533,32 @@ const server = http.createServer(async (req, res) => {
         }
         
         // Handle jobs API
-        // For GET jobs requests
-        if (req.method === 'GET') {
-            // Get single job
-            if (parts.length >= 3 && parts[2] && parts[2] !== '') {
-                const jobId = parts[2];
-                
-                try {
-                    if (db) {
-                        // Query from database
-                        const [rows] = await db.execute(
-                            'SELECT * FROM jobs WHERE id = ?',
-                            [jobId]
-                        );
-                        
-                        if (rows.length === 0) {
-                            res.writeHead(404, { 'Content-Type': 'application/json' });
-                            res.end(JSON.stringify({ error: 'Job not found' }));
-                            return;
-                        }
-                        
-                        const job = rows[0];
-                        res.writeHead(200, { 'Content-Type': 'application/json' });
-                        res.end(JSON.stringify(job));
-                        
-                    } else {
-                        // Get from memory storage
-                        const job = memStorage.getJobById(jobId);
-                        
-                        if (!job) {
-                            res.writeHead(404, { 'Content-Type': 'application/json' });
-                            res.end(JSON.stringify({ error: 'Job not found' }));
-                            return;
-                        }
-                        
-                        res.writeHead(200, { 'Content-Type': 'application/json' });
-                        res.end(JSON.stringify(job));
-                    }
-                } catch (error) {
-                    console.error(`[${new Date().toISOString()}] Error fetching job:`, error);
-                    res.writeHead(500, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ error: 'Failed to fetch job details' }));
-                }
-            } 
-            // Get all jobs or search
-            else {
-                // Check for search query
-                const queryParams = {};
-                if (reqUrl.search) {
-                    const searchParams = new URLSearchParams(reqUrl.search.substring(1));
-                    for (const [key, value] of searchParams.entries()) {
-                        queryParams[key] = value;
-                    }
-                }
-                
-                try {
-                    if (db) {
-                        let query = 'SELECT * FROM jobs';
-                        const params = [];
-                        
-                        // Add search condition if provided
-                        if (queryParams.search) {
-                            query += ' WHERE title LIKE ? OR description LIKE ? OR skills LIKE ?';
-                            const searchPattern = `%${queryParams.search}%`;
-                            params.push(searchPattern, searchPattern, searchPattern);
-                        }
-                        
-                        // Add client filter if provided
-                        if (queryParams.client_id) {
-                            query += params.length ? ' AND' : ' WHERE';
-                            query += ' client_id = ?';
-                            params.push(queryParams.client_id);
-                        }
-                        
-                        // Add status filter if provided
-                        if (queryParams.status) {
-                            query += params.length ? ' AND' : ' WHERE';
-                            query += ' status = ?';
-                            params.push(queryParams.status.toUpperCase());
-                        }
-                        
-                        // Order by
-                        query += ' ORDER BY created_at DESC';
-                        
-                        // Execute query
-                        const [rows] = await db.execute(query, params);
-                        
-                        res.writeHead(200, { 'Content-Type': 'application/json' });
-                        res.end(JSON.stringify(rows));
-                        
-                    } else {
-                        // Get from memory storage
-                        let jobs = memStorage.getAllJobs();
-                        
-                        // Apply filters
-                        if (queryParams.client_id) {
-                            jobs = jobs.filter(job => job.client_id === queryParams.client_id);
-                        }
-                        
-                        if (queryParams.status) {
-                            jobs = jobs.filter(job => job.status === queryParams.status.toUpperCase());
-                        }
-                        
-                        if (queryParams.search) {
-                            jobs = memStorage.searchJobs(queryParams.search);
-                        }
-                        
-                        // Sort by created_at descending
-                        jobs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-                        
-                        res.writeHead(200, { 'Content-Type': 'application/json' });
-                        res.end(JSON.stringify(jobs));
-                    }
-                } catch (error) {
-                    console.error(`[${new Date().toISOString()}] Error fetching jobs:`, error);
-                    res.writeHead(500, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ error: 'Failed to fetch jobs' }));
-                }
-            }
-        }
-        // For POST jobs (create new job)
-        else if (req.method === 'POST') {
-            let body = '';
-            req.on('data', chunk => {
-                body += chunk.toString();
-            });
-            
-            req.on('end', async () => {
-                try {
-                    const jobData = JSON.parse(body);
-                    
-                    // Validate required fields
-                    if (!jobData.title || !jobData.description || !jobData.budget || !jobData.client_id || !jobData.skills) {
-                        res.writeHead(400, { 'Content-Type': 'application/json' });
-                        res.end(JSON.stringify({ 
-                            error: 'Missing required fields', 
-                            required: ['title', 'description', 'budget', 'client_id', 'skills'] 
-                        }));
-                        return;
-                    }
-                    
-                    // Generate ID for the job
-                    const jobId = crypto.randomUUID();
-                    
-                    // Format the skills array into a string if necessary
-                    const skillsString = Array.isArray(jobData.skills) 
-                        ? jobData.skills.join(',') 
-                        : jobData.skills;
+            // For GET jobs requests
+            if (req.method === 'GET') {
+                // Get single job
+                if (parts.length >= 3 && parts[2] && parts[2] !== '') {
+                    const jobId = parts[2];
                     
                     try {
                         if (db) {
-                            // Save to database
-                            await db.execute(
-                                `INSERT INTO jobs (
-                                    id, client_id, title, description, budget, currency, 
-                                    skills, status, deadline, location
-                                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                                [
-                                    jobId,
-                                    jobData.client_id,
-                                    jobData.title,
-                                    jobData.description,
-                                    jobData.budget,
-                                    jobData.currency || 'ZAR',
-                                    skillsString,
-                                    jobData.status || 'OPEN',
-                                    jobData.deadline || null,
-                                    jobData.location || 'Remote'
-                                ]
-                            );
-                            
-                            // Fetch the created job
+                            // Query from database
                             const [rows] = await db.execute(
                                 'SELECT * FROM jobs WHERE id = ?',
                                 [jobId]
                             );
                             
-                            const job = rows[0];
-                            res.writeHead(201, { 'Content-Type': 'application/json' });
-                            res.end(JSON.stringify(job));
-                            
-                        } else {
-                            // Prepare job object for memory storage
-                            const job = {
-                                id: jobId,
-                                client_id: jobData.client_id,
-                                title: jobData.title,
-                                description: jobData.description,
-                                budget: parseFloat(jobData.budget),
-                                currency: jobData.currency || 'ZAR',
-                                skills: Array.isArray(jobData.skills) ? jobData.skills : jobData.skills.split(','),
-                                status: jobData.status || 'OPEN',
-                                created_at: new Date(),
-                                updated_at: new Date(),
-                                deadline: jobData.deadline || null,
-                                location: jobData.location || 'Remote'
-                            };
-                            
-                            // Save to memory storage
-                            memStorage.saveJob(job);
-                            
-                            res.writeHead(201, { 'Content-Type': 'application/json' });
-                            res.end(JSON.stringify(job));
-                        }
-                    } catch (dbError) {
-                        console.error(`[${new Date().toISOString()}] Database error creating job:`, dbError);
-                        res.writeHead(500, { 'Content-Type': 'application/json' });
-                        res.end(JSON.stringify({ error: 'Failed to create job' }));
-                    }
-                } catch (parseError) {
-                    console.error(`[${new Date().toISOString()}] Error parsing job data:`, parseError);
-                    res.writeHead(400, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ error: 'Invalid job data format' }));
-                }
-            });
-            return;
-        }
-        // For PUT (update job)
-        else if (req.method === 'PUT' && parts.length >= 3 && parts[2] && parts[2] !== '') {
-            const jobId = parts[2];
-            
-            let body = '';
-            req.on('data', chunk => {
-                body += chunk.toString();
-            });
-            
-            req.on('end', async () => {
-                try {
-                    const jobData = JSON.parse(body);
-                    
-                    try {
-                        if (db) {
-                            // Check if job exists
-                            const [checkRows] = await db.execute(
-                                'SELECT * FROM jobs WHERE id = ?',
-                                [jobId]
-                            );
-                            
-                            if (checkRows.length === 0) {
+                            if (rows.length === 0) {
                                 res.writeHead(404, { 'Content-Type': 'application/json' });
                                 res.end(JSON.stringify({ error: 'Job not found' }));
                                 return;
                             }
-                            
-                            // Build the update query dynamically based on provided fields
-                            let updateQuery = 'UPDATE jobs SET ';
-                            const updateValues = [];
-                            
-                            if (jobData.title) {
-                                updateQuery += 'title = ?, ';
-                                updateValues.push(jobData.title);
-                            }
-                            
-                            if (jobData.description) {
-                                updateQuery += 'description = ?, ';
-                                updateValues.push(jobData.description);
-                            }
-                            
-                            if (jobData.budget) {
-                                updateQuery += 'budget = ?, ';
-                                updateValues.push(jobData.budget);
-                            }
-                            
-                            if (jobData.currency) {
-                                updateQuery += 'currency = ?, ';
-                                updateValues.push(jobData.currency);
-                            }
-                            
-                            if (jobData.skills) {
-                                const skillsString = Array.isArray(jobData.skills) 
-                                    ? jobData.skills.join(',') 
-                                    : jobData.skills;
-                                updateQuery += 'skills = ?, ';
-                                updateValues.push(skillsString);
-                            }
-                            
-                            if (jobData.status) {
-                                updateQuery += 'status = ?, ';
-                                updateValues.push(jobData.status);
-                            }
-                            
-                            if (jobData.deadline) {
-                                updateQuery += 'deadline = ?, ';
-                                updateValues.push(jobData.deadline);
-                            }
-                            
-                            if (jobData.location) {
-                                updateQuery += 'location = ?, ';
-                                updateValues.push(jobData.location);
-                            }
-                            
-                            // Always update the updated_at timestamp
-                            updateQuery += 'updated_at = NOW() ';
-                            
-                            // Add the WHERE clause
-                            updateQuery += 'WHERE id = ?';
-                            updateValues.push(jobId);
-                            
-                            // Execute the update
-                            await db.execute(updateQuery, updateValues);
-                            
-                            // Fetch updated job
-                            const [rows] = await db.execute(
-                                'SELECT * FROM jobs WHERE id = ?',
-                                [jobId]
-                            );
                             
                             const job = rows[0];
                             res.writeHead(200, { 'Content-Type': 'application/json' });
                             res.end(JSON.stringify(job));
                             
                         } else {
-                            // Update in memory storage
+                            // Get from memory storage
                             const job = memStorage.getJobById(jobId);
                             
                             if (!job) {
@@ -852,46 +567,338 @@ const server = http.createServer(async (req, res) => {
                                 return;
                             }
                             
-                            // Update fields
-                            if (jobData.title) job.title = jobData.title;
-                            if (jobData.description) job.description = jobData.description;
-                            if (jobData.budget) job.budget = parseFloat(jobData.budget);
-                            if (jobData.currency) job.currency = jobData.currency;
-                            if (jobData.skills) {
-                                job.skills = Array.isArray(jobData.skills) 
-                                    ? jobData.skills 
-                                    : jobData.skills.split(',');
-                            }
-                            if (jobData.status) job.status = jobData.status;
-                            if (jobData.deadline) job.deadline = jobData.deadline;
-                            if (jobData.location) job.location = jobData.location;
-                            
-                            // Update timestamp
-                            job.updated_at = new Date();
-                            
-                            // Save updated job
-                            memStorage.saveJob(job);
-                            
                             res.writeHead(200, { 'Content-Type': 'application/json' });
                             res.end(JSON.stringify(job));
                         }
-                    } catch (dbError) {
-                        console.error(`[${new Date().toISOString()}] Error updating job:`, dbError);
+                    } catch (error) {
+                        console.error(`[${new Date().toISOString()}] Error fetching job:`, error);
                         res.writeHead(500, { 'Content-Type': 'application/json' });
-                        res.end(JSON.stringify({ error: 'Failed to update job' }));
+                        res.end(JSON.stringify({ error: 'Failed to fetch job details' }));
                     }
-                } catch (parseError) {
-                    console.error(`[${new Date().toISOString()}] Error parsing job update data:`, parseError);
-                    res.writeHead(400, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ error: 'Invalid job data format' }));
+                } 
+                // Get all jobs or search
+                else {
+                    // Check for search query
+                    const queryParams = {};
+                    if (reqUrl.search) {
+                        const searchParams = new URLSearchParams(reqUrl.search.substring(1));
+                        for (const [key, value] of searchParams.entries()) {
+                            queryParams[key] = value;
+                        }
+                    }
+                    
+                    try {
+                        if (db) {
+                            let query = 'SELECT * FROM jobs';
+                            const params = [];
+                            
+                            // Add search condition if provided
+                            if (queryParams.search) {
+                                query += ' WHERE title LIKE ? OR description LIKE ? OR skills LIKE ?';
+                                const searchPattern = `%${queryParams.search}%`;
+                                params.push(searchPattern, searchPattern, searchPattern);
+                            }
+                            
+                            // Add client filter if provided
+                            if (queryParams.client_id) {
+                                query += params.length ? ' AND' : ' WHERE';
+                                query += ' client_id = ?';
+                                params.push(queryParams.client_id);
+                            }
+                            
+                            // Add status filter if provided
+                            if (queryParams.status) {
+                                query += params.length ? ' AND' : ' WHERE';
+                                query += ' status = ?';
+                                params.push(queryParams.status.toUpperCase());
+                            }
+                            
+                            // Order by
+                            query += ' ORDER BY created_at DESC';
+                            
+                            // Execute query
+                            const [rows] = await db.execute(query, params);
+                            
+                            res.writeHead(200, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify(rows));
+                            
+                        } else {
+                            // Get from memory storage
+                            let jobs = memStorage.getAllJobs();
+                            
+                            // Apply filters
+                            if (queryParams.client_id) {
+                                jobs = jobs.filter(job => job.client_id === queryParams.client_id);
+                            }
+                            
+                            if (queryParams.status) {
+                                jobs = jobs.filter(job => job.status === queryParams.status.toUpperCase());
+                            }
+                            
+                            if (queryParams.search) {
+                                jobs = memStorage.searchJobs(queryParams.search);
+                            }
+                            
+                            // Sort by created_at descending
+                            jobs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                            
+                            res.writeHead(200, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify(jobs));
+                        }
+                    } catch (error) {
+                        console.error(`[${new Date().toISOString()}] Error fetching jobs:`, error);
+                        res.writeHead(500, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ error: 'Failed to fetch jobs' }));
+                    }
                 }
-            });
+            }
+            // For POST jobs (create new job)
+            else if (req.method === 'POST') {
+                let body = '';
+                req.on('data', chunk => {
+                    body += chunk.toString();
+                });
+                
+                req.on('end', async () => {
+                    try {
+                        const jobData = JSON.parse(body);
+                        
+                        // Validate required fields
+                        if (!jobData.title || !jobData.description || !jobData.budget || !jobData.client_id || !jobData.skills) {
+                            res.writeHead(400, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({ 
+                                error: 'Missing required fields', 
+                                required: ['title', 'description', 'budget', 'client_id', 'skills'] 
+                            }));
+                            return;
+                        }
+                        
+                        // Generate ID for the job
+                        const jobId = crypto.randomUUID();
+                        
+                        // Format the skills array into a string if necessary
+                        const skillsString = Array.isArray(jobData.skills) 
+                            ? jobData.skills.join(',') 
+                            : jobData.skills;
+                        
+                        try {
+                            if (db) {
+                                // Save to database
+                                await db.execute(
+                                    `INSERT INTO jobs (
+                                        id, client_id, title, description, budget, currency, 
+                                        skills, status, deadline, location
+                                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                                    [
+                                        jobId,
+                                        jobData.client_id,
+                                        jobData.title,
+                                        jobData.description,
+                                        jobData.budget,
+                                        jobData.currency || 'ZAR',
+                                        skillsString,
+                                        jobData.status || 'OPEN',
+                                        jobData.deadline || null,
+                                        jobData.location || 'Remote'
+                                    ]
+                                );
+                                
+                                // Fetch the created job
+                                const [rows] = await db.execute(
+                                    'SELECT * FROM jobs WHERE id = ?',
+                                    [jobId]
+                                );
+                                
+                                const job = rows[0];
+                                res.writeHead(201, { 'Content-Type': 'application/json' });
+                                res.end(JSON.stringify(job));
+                                
+                            } else {
+                                // Prepare job object for memory storage
+                                const job = {
+                                    id: jobId,
+                                    client_id: jobData.client_id,
+                                    title: jobData.title,
+                                    description: jobData.description,
+                                    budget: parseFloat(jobData.budget),
+                                    currency: jobData.currency || 'ZAR',
+                                    skills: Array.isArray(jobData.skills) ? jobData.skills : jobData.skills.split(','),
+                                    status: jobData.status || 'OPEN',
+                                    created_at: new Date(),
+                                    updated_at: new Date(),
+                                    deadline: jobData.deadline || null,
+                                    location: jobData.location || 'Remote'
+                                };
+                                
+                                // Save to memory storage
+                                memStorage.saveJob(job);
+                                
+                                res.writeHead(201, { 'Content-Type': 'application/json' });
+                                res.end(JSON.stringify(job));
+                            }
+                        } catch (dbError) {
+                            console.error(`[${new Date().toISOString()}] Database error creating job:`, dbError);
+                            res.writeHead(500, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({ error: 'Failed to create job' }));
+                        }
+                    } catch (parseError) {
+                        console.error(`[${new Date().toISOString()}] Error parsing job data:`, parseError);
+                        res.writeHead(400, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ error: 'Invalid job data format' }));
+                    }
+                });
+                return;
+            }
+            // For PUT (update job)
+            else if (req.method === 'PUT' && parts.length >= 3 && parts[2] && parts[2] !== '') {
+                const jobId = parts[2];
+                
+                let body = '';
+                req.on('data', chunk => {
+                    body += chunk.toString();
+                });
+                
+                req.on('end', async () => {
+                    try {
+                        const jobData = JSON.parse(body);
+                        
+                        try {
+                            if (db) {
+                                // Check if job exists
+                                const [checkRows] = await db.execute(
+                                    'SELECT * FROM jobs WHERE id = ?',
+                                    [jobId]
+                                );
+                                
+                                if (checkRows.length === 0) {
+                                    res.writeHead(404, { 'Content-Type': 'application/json' });
+                                    res.end(JSON.stringify({ error: 'Job not found' }));
+                                    return;
+                                }
+                                
+                                // Build the update query dynamically based on provided fields
+                                let updateQuery = 'UPDATE jobs SET ';
+                                const updateValues = [];
+                                
+                                if (jobData.title) {
+                                    updateQuery += 'title = ?, ';
+                                    updateValues.push(jobData.title);
+                                }
+                                
+                                if (jobData.description) {
+                                    updateQuery += 'description = ?, ';
+                                    updateValues.push(jobData.description);
+                                }
+                                
+                                if (jobData.budget) {
+                                    updateQuery += 'budget = ?, ';
+                                    updateValues.push(jobData.budget);
+                                }
+                                
+                                if (jobData.currency) {
+                                    updateQuery += 'currency = ?, ';
+                                    updateValues.push(jobData.currency);
+                                }
+                                
+                                if (jobData.skills) {
+                                    const skillsString = Array.isArray(jobData.skills) 
+                                        ? jobData.skills.join(',') 
+                                        : jobData.skills;
+                                    updateQuery += 'skills = ?, ';
+                                    updateValues.push(skillsString);
+                                }
+                                
+                                if (jobData.status) {
+                                    updateQuery += 'status = ?, ';
+                                    updateValues.push(jobData.status);
+                                }
+                                
+                                if (jobData.deadline) {
+                                    updateQuery += 'deadline = ?, ';
+                                    updateValues.push(jobData.deadline);
+                                }
+                                
+                                if (jobData.location) {
+                                    updateQuery += 'location = ?, ';
+                                    updateValues.push(jobData.location);
+                                }
+                                
+                                // Always update the updated_at timestamp
+                                updateQuery += 'updated_at = NOW() ';
+                                
+                                // Add the WHERE clause
+                                updateQuery += 'WHERE id = ?';
+                                updateValues.push(jobId);
+                                
+                                // Execute the update
+                                await db.execute(updateQuery, updateValues);
+                                
+                                // Fetch updated job
+                                const [rows] = await db.execute(
+                                    'SELECT * FROM jobs WHERE id = ?',
+                                    [jobId]
+                                );
+                                
+                                const job = rows[0];
+                                res.writeHead(200, { 'Content-Type': 'application/json' });
+                                res.end(JSON.stringify(job));
+                                
+                            } else {
+                                // Update in memory storage
+                                const job = memStorage.getJobById(jobId);
+                                
+                                if (!job) {
+                                    res.writeHead(404, { 'Content-Type': 'application/json' });
+                                    res.end(JSON.stringify({ error: 'Job not found' }));
+                                    return;
+                                }
+                                
+                                // Update fields
+                                if (jobData.title) job.title = jobData.title;
+                                if (jobData.description) job.description = jobData.description;
+                                if (jobData.budget) job.budget = parseFloat(jobData.budget);
+                                if (jobData.currency) job.currency = jobData.currency;
+                                if (jobData.skills) {
+                                    job.skills = Array.isArray(jobData.skills) 
+                                        ? jobData.skills 
+                                        : jobData.skills.split(',');
+                                }
+                                if (jobData.status) job.status = jobData.status;
+                                if (jobData.deadline) job.deadline = jobData.deadline;
+                                if (jobData.location) job.location = jobData.location;
+                                
+                                // Update timestamp
+                                job.updated_at = new Date();
+                                
+                                // Save updated job
+                                memStorage.saveJob(job);
+                                
+                                res.writeHead(200, { 'Content-Type': 'application/json' });
+                                res.end(JSON.stringify(job));
+                            }
+                        } catch (dbError) {
+                            console.error(`[${new Date().toISOString()}] Error updating job:`, dbError);
+                            res.writeHead(500, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({ error: 'Failed to update job' }));
+                        }
+                    } catch (parseError) {
+                        console.error(`[${new Date().toISOString()}] Error parsing job update data:`, parseError);
+                        res.writeHead(400, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ error: 'Invalid job data format' }));
+                    }
+                });
+                return;
+            }
+            else {
+                res.writeHead(405, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Method not allowed' }));
+            }
             return;
         }
-        else {
-            res.writeHead(405, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Method not allowed' }));
-        }
+        
+        // For other API endpoints, provide a generic response
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ message: `Handling ${req.method} request to ${reqUrl.pathname}` }));
     } else {
         // Serve static files
         serveFile(filePath, res);
