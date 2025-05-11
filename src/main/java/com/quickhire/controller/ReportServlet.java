@@ -157,10 +157,10 @@ public class ReportServlet extends HttpServlet {
             
             if (reportedUserIdStr != null) {
                 try {
-                    int reportedUserId = Integer.parseInt(reportedUserIdStr);
+                    UUID reportedUserId = UUID.fromString(reportedUserIdStr);
                     showReportForm(request, response, reportedUserId);
                     return;
-                } catch (NumberFormatException e) {
+                } catch (IllegalArgumentException e) {
                     // Invalid user ID, redirect to home
                 }
             }
@@ -170,16 +170,17 @@ public class ReportServlet extends HttpServlet {
         }
         
         try {
-            int reportedUserId = Integer.parseInt(reportedUserIdStr);
+            UUID reportedUserId = UUID.fromString(reportedUserIdStr);
             
             // Check if reported user exists
-            User reportedUser = userDAO.findById(reportedUserId);
+            Optional<User> reportedUserOptional = userDAO.findById(reportedUserId);
+            User reportedUser = reportedUserOptional.orElse(null);
             if (reportedUser == null) {
-                throw new NumberFormatException("Invalid user");
+                throw new IllegalArgumentException("Invalid user");
             }
             
             // Cannot report yourself
-            if (reporter.getId() == reportedUserId) {
+            if (reporter.getId().equals(reportedUserId)) {
                 response.sendRedirect(request.getContextPath() + "/");
                 return;
             }
@@ -199,7 +200,7 @@ public class ReportServlet extends HttpServlet {
             request.getSession().setAttribute("successMessage", "Report submitted successfully");
             response.sendRedirect(request.getContextPath() + "/");
             
-        } catch (NumberFormatException e) {
+        } catch (IllegalArgumentException e) {
             response.sendRedirect(request.getContextPath() + "/");
         }
     }
@@ -207,7 +208,7 @@ public class ReportServlet extends HttpServlet {
     /**
      * Update report status (admin only)
      */
-    private void updateReport(HttpServletRequest request, HttpServletResponse response, int reportId) 
+    private void updateReport(HttpServletRequest request, HttpServletResponse response, UUID reportId) 
             throws ServletException, IOException, SQLException {
         User admin = AuthUtil.getUserFromSession(request);
         
