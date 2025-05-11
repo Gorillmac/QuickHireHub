@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Test - QuickHire</title>
+    <script>
+        // Set up localStorage values for testing
+        localStorage.setItem('userId', '1d505d59-60b5-44d5-82b2-6527161f68b1');
+        localStorage.setItem('firstName', 'John');
+        localStorage.setItem('lastName', 'Smith');
+        localStorage.setItem('email', 'johnsmith@example.com');
+        localStorage.setItem('userType', 'client');
+        localStorage.setItem('currency', 'ZAR');
+        localStorage.setItem('locale', 'en-ZA');
+        
+        // Redirect to the dashboard after setting localStorage
+        window.location.href = 'client-dashboard-dynamic.html';
+    </script>
+</head>
+<body>
+    <p>Loading dashboard...</p>
+</body>
+</html>
