@@ -419,6 +419,18 @@
                         showMessage(data.error, 'error');
                     } else if (data && data.success) {
                         showMessage(data.success, 'success');
+                        
+                        // Store user info in localStorage for the dashboard
+                        if (data.user) {
+                            localStorage.setItem('userId', data.user.id);
+                            localStorage.setItem('firstName', data.user.firstName || data.user.first_name);
+                            localStorage.setItem('lastName', data.user.lastName || data.user.last_name);
+                            localStorage.setItem('email', data.user.email);
+                            localStorage.setItem('userType', (data.user.userType || data.user.user_type || '').toLowerCase());
+                            localStorage.setItem('currency', data.user.currency || 'ZAR');
+                            localStorage.setItem('locale', data.user.locale || 'en-ZA');
+                        }
+                        
                         // Redirect to appropriate dashboard after a short delay
                         setTimeout(() => {
                             window.location.href = data.redirect || 'index.html';

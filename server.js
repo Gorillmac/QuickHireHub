@@ -245,7 +245,7 @@ const server = http.createServer(async (req, res) => {
                         // For a real application, we'd add more validation and password hashing
                         
                         // Determine which dashboard to redirect to based on user type
-                        const redirectUrl = userData.userType === 'freelancer' ? 'freelancer-dashboard.html' : 'client-dashboard.html';
+                        const redirectUrl = userData.userType === 'freelancer' ? 'freelancer-dashboard-dynamic.html' : 'client-dashboard-dynamic.html';
                         
                         // Generate a random UUID for the new user
                         const userId = crypto.randomUUID();
@@ -366,7 +366,7 @@ const server = http.createServer(async (req, res) => {
                                 const user = rows[0];
                                 const userId = user.id;
                                 const userType = user.user_type.toLowerCase();
-                                const redirectUrl = userType === 'freelancer' ? 'freelancer-dashboard.html' : 'client-dashboard.html';
+                                const redirectUrl = userType === 'freelancer' ? 'freelancer-dashboard-dynamic.html' : 'client-dashboard-dynamic.html';
                                 
                                 // Set up user configuration from database
                                 const userConfig = {
@@ -386,7 +386,16 @@ const server = http.createServer(async (req, res) => {
                                     userId: userId,
                                     userConfig: userConfig,
                                     firstName: user.first_name,
-                                    lastName: user.last_name
+                                    lastName: user.last_name,
+                                    user: {
+                                        id: userId,
+                                        first_name: user.first_name,
+                                        last_name: user.last_name,
+                                        email: user.email,
+                                        user_type: user.user_type,
+                                        currency: user.currency || 'ZAR',
+                                        locale: user.locale || 'en-ZA'
+                                    }
                                 };
                                 
                                 res.end(JSON.stringify(response));
@@ -405,7 +414,7 @@ const server = http.createServer(async (req, res) => {
                                     // User found in memory, get their details
                                     const userId = user.id;
                                     const userType = user.user_type.toLowerCase();
-                                    const redirectUrl = userType === 'freelancer' ? 'freelancer-dashboard.html' : 'client-dashboard.html';
+                                    const redirectUrl = userType === 'freelancer' ? 'freelancer-dashboard-dynamic.html' : 'client-dashboard-dynamic.html';
                                     
                                     // Set up user configuration from memory
                                     const userConfig = {
@@ -438,7 +447,7 @@ const server = http.createServer(async (req, res) => {
                                 // Absolute fallback if memory storage has no user
                                 // Determine user type for redirection based on email
                                 const userType = userData.email.startsWith('f') ? 'freelancer' : 'client';
-                                const redirectUrl = userType === 'freelancer' ? 'freelancer-dashboard.html' : 'client-dashboard.html';
+                                const redirectUrl = userType === 'freelancer' ? 'freelancer-dashboard-dynamic.html' : 'client-dashboard-dynamic.html';
                                 
                                 // Generate a user ID 
                                 const userId = crypto.randomUUID();
@@ -458,7 +467,16 @@ const server = http.createServer(async (req, res) => {
                                     success: 'Login successful! Redirecting to dashboard...',
                                     redirect: redirectUrl,
                                     userId: userId,
-                                    userConfig: userConfig
+                                    userConfig: userConfig,
+                                    user: {
+                                        id: userId,
+                                        first_name: userData.email.split('@')[0], // Extract name from email as fallback
+                                        last_name: '',
+                                        email: userData.email,
+                                        user_type: userType,
+                                        currency: userConfig.currency,
+                                        locale: userConfig.locale
+                                    }
                                 };
                                 
                                 res.end(JSON.stringify(response));
