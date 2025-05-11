@@ -3,6 +3,8 @@ package com.quickhire.controller;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Optional;
+import java.util.UUID;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -57,9 +59,9 @@ public class ReportServlet extends HttpServlet {
                 }
                 
                 try {
-                    int reportedUserId = Integer.parseInt(pathInfo.substring(1));
+                    UUID reportedUserId = UUID.fromString(pathInfo.substring(1));
                     showReportForm(request, response, reportedUserId);
-                } catch (NumberFormatException e) {
+                } catch (IllegalArgumentException e) {
                     response.sendRedirect(request.getContextPath() + "/");
                 }
             } else {
