@@ -113,7 +113,8 @@ public class UserServlet extends HttpServlet {
         User user = AuthUtil.getUserFromSession(request);
         
         // Get updated user data from database
-        user = userDAO.findById(user.getId());
+        Optional<User> userOptional = userDAO.findById(user.getId());
+        user = userOptional.orElse(user);
         
         // Get average rating
         double averageRating = reviewDAO.getAverageRating(user.getId());
@@ -131,7 +132,8 @@ public class UserServlet extends HttpServlet {
         User user = AuthUtil.getUserFromSession(request);
         
         // Get updated user data from database
-        user = userDAO.findById(user.getId());
+        Optional<User> userOptional = userDAO.findById(user.getId());
+        user = userOptional.orElse(user);
         
         request.setAttribute("user", user);
         request.getRequestDispatcher("/profile-edit.jsp").forward(request, response);
@@ -173,7 +175,8 @@ public class UserServlet extends HttpServlet {
         User user = AuthUtil.getUserFromSession(request);
         
         // Get updated user from database
-        user = userDAO.findById(user.getId());
+        Optional<User> userOptional = userDAO.findById(user.getId());
+        user = userOptional.orElse(user);
         
         // Update basic fields
         String fullName = request.getParameter("fullName");
