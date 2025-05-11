@@ -769,7 +769,7 @@
                         <div class="job-details">
                             <div class="job-detail">
                                 <span class="job-detail-label">Budget</span>
-                                <span class="job-detail-value">$4,500 Fixed</span>
+                                <span class="job-detail-value">R75,000 Fixed</span>
                             </div>
                             <div class="job-detail">
                                 <span class="job-detail-label">Duration</span>
@@ -814,6 +814,27 @@
                 userDropdown.classList.remove('show');
             }
         });
+        
+        // South African currency formatter
+        function formatZAR(amount) {
+            return new Intl.NumberFormat('en-ZA', {
+                style: 'currency',
+                currency: 'ZAR',
+                minimumFractionDigits: 2
+            }).format(amount);
+        }
+        
+        // Example of using currency formatter (can be used for dynamic content)
+        function updateCurrencyDisplays() {
+            // This could be used when loading dynamic data from API
+            console.log('Currency format example: ' + formatZAR(75000));
+            
+            // Set the current user locale to South African
+            document.documentElement.lang = 'en-ZA';
+        }
+        
+        // Initialize
+        updateCurrencyDisplays();
     </script>
 </body>
 </html>

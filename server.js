@@ -122,11 +122,22 @@ const server = http.createServer((req, res) => {
                         
                         console.log(`[${new Date().toISOString()}] Created new user with ID: ${userId}`);
                         
+                        // Set up user configuration with South African settings
+                        const userConfig = {
+                            currency: 'ZAR',
+                            locale: 'en-ZA',
+                            country: 'South Africa',
+                            timezone: 'Africa/Johannesburg'
+                        };
+                        
+                        console.log(`[${new Date().toISOString()}] User configuration: ${JSON.stringify(userConfig)}`);
+                        
                         res.writeHead(200, { 'Content-Type': 'application/json' });
                         const response = {
                             success: 'Registration successful! Redirecting to dashboard...',
                             redirect: redirectUrl,
-                            userId: userId
+                            userId: userId,
+                            userConfig: userConfig
                         };
                         res.end(JSON.stringify(response));
                         
@@ -154,11 +165,22 @@ const server = http.createServer((req, res) => {
                         
                         console.log(`[${new Date().toISOString()}] User logged in with ID: ${userId}`);
                         
+                        // Set up user configuration with South African settings
+                        const userConfig = {
+                            currency: 'ZAR',
+                            locale: 'en-ZA',
+                            country: 'South Africa',
+                            timezone: 'Africa/Johannesburg'
+                        };
+                        
+                        console.log(`[${new Date().toISOString()}] User configuration: ${JSON.stringify(userConfig)}`);
+                        
                         res.writeHead(200, { 'Content-Type': 'application/json' });
                         const response = {
                             success: 'Login successful! Redirecting to dashboard...',
                             redirect: redirectUrl,
-                            userId: userId
+                            userId: userId,
+                            userConfig: userConfig
                         };
                         res.end(JSON.stringify(response));
                         
