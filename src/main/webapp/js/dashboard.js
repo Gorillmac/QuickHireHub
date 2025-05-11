@@ -698,11 +698,74 @@ function displayError(containerId, message) {
 }
 
 // Show notification
-function showNotification(message, type = 'info') {
+function showNotification(message, type = 'info', title = '') {
+    // Create notification elements
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
-    notification.textContent = message;
     
+    // Create icon based on type
+    const iconSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    iconSvg.setAttribute('viewBox', '0 0 24 24');
+    iconSvg.setAttribute('fill', 'none');
+    iconSvg.setAttribute('stroke', 'currentColor');
+    iconSvg.setAttribute('stroke-width', '2');
+    iconSvg.setAttribute('stroke-linecap', 'round');
+    iconSvg.setAttribute('stroke-linejoin', 'round');
+    
+    let iconPath = '';
+    
+    if (type === 'success') {
+        iconPath = '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><path d="M22 4L12 14.01l-3-3"></path>';
+        if (!title) title = 'Success';
+    } else if (type === 'error') {
+        iconPath = '<circle cx="12" cy="12" r="10"></circle><path d="M15 9l-6 6"></path><path d="M9 9l6 6"></path>';
+        if (!title) title = 'Error';
+    } else {
+        iconPath = '<circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path>';
+        if (!title) title = 'Information';
+    }
+    
+    iconSvg.innerHTML = iconPath;
+    
+    const iconContainer = document.createElement('div');
+    iconContainer.className = 'notification-icon';
+    iconContainer.appendChild(iconSvg);
+    
+    // Create content container
+    const content = document.createElement('div');
+    content.className = 'notification-content';
+    
+    // Add title if provided
+    const titleEl = document.createElement('div');
+    titleEl.className = 'notification-title';
+    titleEl.textContent = title;
+    content.appendChild(titleEl);
+    
+    // Add message
+    const messageEl = document.createElement('div');
+    messageEl.className = 'notification-message';
+    messageEl.textContent = message;
+    content.appendChild(messageEl);
+    
+    // Create close button
+    const closeBtn = document.createElement('div');
+    closeBtn.className = 'notification-close';
+    closeBtn.innerHTML = '&times;';
+    closeBtn.addEventListener('click', () => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            if (notification.parentNode) {
+                document.body.removeChild(notification);
+            }
+        }, 400);
+    });
+    
+    // Assemble notification
+    notification.appendChild(iconContainer);
+    notification.appendChild(content);
+    notification.appendChild(closeBtn);
+    
+    // Append to body
     document.body.appendChild(notification);
     
     // Show notification
@@ -710,13 +773,17 @@ function showNotification(message, type = 'info') {
         notification.classList.add('show');
     }, 10);
     
-    // Hide and remove notification after 3 seconds
+    // Hide and remove after 4 seconds
     setTimeout(() => {
-        notification.classList.remove('show');
-        setTimeout(() => {
-            notification.remove();
-        }, 300);
-    }, 3000);
+        if (notification.parentNode) {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    document.body.removeChild(notification);
+                }
+            }, 400);
+        }
+    }, 4000);
 }
 
 // Load freelancer's active jobs
