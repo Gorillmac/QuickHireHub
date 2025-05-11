@@ -3,6 +3,7 @@ package com.quickhire.servlet;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Optional;
+import java.util.UUID;
 
 import com.quickhire.dao.UserDAO;
 import com.quickhire.model.User;
@@ -39,7 +40,9 @@ public class RegisterServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        System.out.println("Registration request received");
+        System.out.println("Registration request received at: " + new java.util.Date());
+        System.out.println("Request URI: " + request.getRequestURI());
+        System.out.println("Content type: " + request.getContentType());
         
         // Set response type to JSON
         response.setContentType("application/json");

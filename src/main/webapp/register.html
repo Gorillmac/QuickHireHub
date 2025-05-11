@@ -477,12 +477,23 @@
                     return;
                 }
                 
-                // AJAX registration request
-                const formData = new FormData(registerForm);
+                // Prepare form data as JSON
+                const formData = {
+                    firstName: document.getElementById('firstName').value.trim(),
+                    lastName: document.getElementById('lastName').value.trim(),
+                    email: document.getElementById('email').value.trim(),
+                    password: document.getElementById('password').value,
+                    userType: document.getElementById('userType').value
+                };
+                
+                console.log('Submitting registration form:', formData);
                 
                 fetch('/register', {
                     method: 'POST',
-                    body: formData
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
                 })
                 .then(response => {
                     if (response.redirected) {

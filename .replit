@@ -14,15 +14,28 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Static Web Server"
+args = "QuickHire Server"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "QuickHire Node Server"
 
 [[workflows.workflow]]
-name = "Static Web Server"
+name = "QuickHire Server"
 author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npx http-server src/main/webapp -p 5000 --cors"
+args = "./run.sh"
+waitForPort = 5000
+
+[[workflows.workflow]]
+name = "QuickHire Node Server"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node server.js"
 waitForPort = 5000
 
 [deployment]
