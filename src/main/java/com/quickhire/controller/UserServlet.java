@@ -2,6 +2,8 @@ package com.quickhire.controller;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Optional;
+import java.util.UUID;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -64,9 +66,9 @@ public class UserServlet extends HttpServlet {
                     
                     // Extract user ID from path
                     try {
-                        int userId = Integer.parseInt(pathInfo.substring(1));
+                        UUID userId = UUID.fromString(pathInfo.substring(1));
                         viewUserProfile(request, response, userId);
-                    } catch (NumberFormatException e) {
+                    } catch (IllegalArgumentException e) {
                         response.sendRedirect(request.getContextPath() + "/");
                     }
                     break;
@@ -138,10 +140,11 @@ public class UserServlet extends HttpServlet {
     /**
      * View another user's profile
      */
-    private void viewUserProfile(HttpServletRequest request, HttpServletResponse response, int userId) 
+    private void viewUserProfile(HttpServletRequest request, HttpServletResponse response, UUID userId) 
             throws ServletException, IOException, SQLException {
         User currentUser = AuthUtil.getUserFromSession(request);
-        User profileUser = userDAO.findById(userId);
+        Optional<User> profileUserOptional = userDAO.findById(userId);
+        User profileUser = profileUserOptional.orElse(null);
         
         if (profileUser == null) {
             response.sendRedirect(request.getContextPath() + "/");
@@ -149,7 +152,7 @@ public class UserServlet extends HttpServlet {
         }
         
         // If viewing own profile, redirect to profile page
-        if (currentUser.getId() == userId) {
+        if (currentUser.getId().equals(userId)) {
             response.sendRedirect(request.getContextPath() + "/profile");
             return;
         }

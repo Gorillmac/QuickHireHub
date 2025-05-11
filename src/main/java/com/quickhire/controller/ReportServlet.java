@@ -117,10 +117,11 @@ public class ReportServlet extends HttpServlet {
     /**
      * Show report creation form
      */
-    private void showReportForm(HttpServletRequest request, HttpServletResponse response, int reportedUserId) 
+    private void showReportForm(HttpServletRequest request, HttpServletResponse response, UUID reportedUserId) 
             throws ServletException, IOException, SQLException {
         User reporter = AuthUtil.getUserFromSession(request);
-        User reportedUser = userDAO.findById(reportedUserId);
+        Optional<User> reportedUserOptional = userDAO.findById(reportedUserId);
+        User reportedUser = reportedUserOptional.orElse(null);
         
         if (reportedUser == null) {
             response.sendRedirect(request.getContextPath() + "/");
@@ -128,7 +129,7 @@ public class ReportServlet extends HttpServlet {
         }
         
         // Cannot report yourself
-        if (reporter.getId() == reportedUserId) {
+        if (reporter.getId().equals(reportedUserId)) {
             response.sendRedirect(request.getContextPath() + "/");
             return;
         }
