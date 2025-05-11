@@ -14,25 +14,27 @@
             <a href="index.html" class="logo"><i class="fas fa-bolt"></i> QuickHire</a>
             
             <div class="nav-links">
-                <a href="index.html">Home</a>
-                <a href="#">Find Talent</a>
-                <a href="#">Messages</a>
+                <a href="index.html" class="nav-link"><i class="fas fa-home"></i> Home</a>
+                <a href="#" class="nav-link"><i class="fas fa-search"></i> Find Talent</a>
+                <a href="#" class="nav-link"><i class="fas fa-envelope"></i> Messages</a>
             </div>
             
             <div class="user-menu">
                 <button class="user-button" id="userMenuButton">
-                    <img src="https://ui-avatars.com/api/?background=4361ee&color=fff" alt="User Avatar" id="user-avatar">
+                    <div class="avatar-container">
+                        <img src="https://ui-avatars.com/api/?background=4361ee&color=fff&name=John+Smith" alt="User Avatar" id="user-avatar">
+                    </div>
                     <span id="profile-name">Loading...</span>
                     <i class="fas fa-chevron-down"></i>
                 </button>
                 
                 <div class="dropdown-menu" id="userDropdown">
-                    <a href="client-dashboard-dynamic.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-                    <a href="#"><i class="fas fa-user"></i> Profile</a>
-                    <a href="#"><i class="fas fa-briefcase"></i> My Jobs</a>
-                    <a href="#"><i class="fas fa-cog"></i> Settings</a>
-                    <hr>
-                    <button id="logout-btn"><i class="fas fa-sign-out-alt"></i> Log Out</button>
+                    <a href="client-dashboard-dynamic.html" class="dropdown-item"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    <a href="#" class="dropdown-item"><i class="fas fa-user"></i> Profile</a>
+                    <a href="#" class="dropdown-item"><i class="fas fa-briefcase"></i> My Jobs</a>
+                    <a href="#" class="dropdown-item"><i class="fas fa-cog"></i> Settings</a>
+                    <div class="dropdown-divider"></div>
+                    <button id="logout-btn" class="dropdown-item logout-btn"><i class="fas fa-sign-out-alt"></i> Log Out</button>
                 </div>
             </div>
         </div>
@@ -67,15 +69,18 @@
             <div class="dashboard-header">
                 <h1 class="welcome-message" id="welcome-message">Welcome back!</h1>
                 <div class="header-actions">
-                    <button id="new-job-btn" class="btn btn-primary"><i class="fas fa-plus"></i> Post a New Job</button>
+                    <button id="new-job-btn" class="btn btn-primary btn-lg"><i class="fas fa-plus-circle"></i> Post a New Job</button>
                 </div>
             </div>
             
             <!-- Search Bar -->
             <div class="search-bar">
                 <form id="search-form" class="search-form">
-                    <input type="text" id="search-input" class="search-input" placeholder="Search your jobs...">
-                    <button type="submit" class="btn btn-primary">Search</button>
+                    <div class="search-input-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="search-input" class="search-input" placeholder="Search your jobs by title, skill or keyword...">
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
                 </form>
             </div>
             
@@ -118,21 +123,43 @@
             <!-- Recent Activity -->
             <div class="section">
                 <div class="section-header">
-                    <h2 class="section-title">Recent Activity</h2>
+                    <h2 class="section-title"><i class="fas fa-history"></i> Recent Activity</h2>
+                    <div class="section-actions">
+                        <button class="btn btn-tertiary btn-sm"><i class="fas fa-sync-alt"></i> Refresh</button>
+                    </div>
                 </div>
                 <div class="activity-timeline" id="activity-timeline">
-                    <div class="empty-state">No recent activity to display.</div>
+                    <div class="empty-state">
+                        <i class="fas fa-history empty-icon"></i>
+                        <p>No recent activity to display.</p>
+                        <small>Your recent actions and notifications will appear here.</small>
+                    </div>
                 </div>
             </div>
             
             <!-- My Jobs Section -->
             <div class="section">
                 <div class="job-list-header">
-                    <h2 class="job-list-title">My Jobs</h2>
+                    <h2 class="job-list-title"><i class="fas fa-briefcase"></i> My Jobs</h2>
+                    <div class="job-list-actions">
+                        <div class="job-filter">
+                            <select class="form-select">
+                                <option value="all">All Jobs</option>
+                                <option value="open">Open Jobs</option>
+                                <option value="in-progress">In Progress</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-secondary"><i class="fas fa-sort"></i> Sort</button>
+                    </div>
                 </div>
                 <div id="job-list" class="job-list">
                     <!-- Job cards will be dynamically inserted here -->
-                    <div class="empty-state">Loading your jobs...</div>
+                    <div class="empty-state">
+                        <i class="fas fa-briefcase empty-icon"></i>
+                        <p>You haven't posted any jobs yet.</p>
+                        <button class="btn btn-primary btn-md mt-3"><i class="fas fa-plus-circle"></i> Post Your First Job</button>
+                    </div>
                 </div>
             </div>
         </div>
