@@ -26,9 +26,7 @@ QuickHire is a comprehensive freelance job matching platform that allows:
 2. Open a terminal/command prompt
 3. Navigate to the project directory
 4. Run the server:
-   ```
-   node server.js
-   ```
+ 
 5. Open your browser and go to: http://localhost:5000/test-dashboard.html
 
 ## Project Structure
