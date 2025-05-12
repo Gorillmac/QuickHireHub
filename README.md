@@ -15,25 +15,21 @@ QuickHire is a comprehensive freelance job matching platform that allows:
 
 - Frontend: HTML5, CSS3, JavaScript
 - Backend: Node.js and Java Enterprise Edition (JEE)
-- Database: PostgreSQL (configured, fallback to in-memory storage)
+- Database: MySQL and PostgreSQL support
 - Build Tool: Maven for Java components
 
-## Running the Project Locally
+## Running the Project
 
-### Quick Start (Node.js server only)
+### Quick Start (Node.js server)
 
 1. Make sure Node.js is installed
 2. Open a terminal/command prompt
 3. Navigate to the project directory
-4. Run the simplified local server:
+4. Run the server:
    ```
-   node local-server.js
+   node server.js
    ```
 5. Open your browser and go to: http://localhost:5000/test-dashboard.html
-
-### VS Code Setup
-
-For detailed instructions on setting up the project in Visual Studio Code, see [VS Code Setup Guide](vs-code-setup.md).
 
 ## Project Structure
 
@@ -46,8 +42,7 @@ QuickHire/
 │           ├── css/     # Stylesheets
 │           ├── js/      # JavaScript files
 │           └── *.html   # HTML pages
-├── server.js           # Production Node.js server
-├── local-server.js     # Simplified server for local development
+├── server.js           # Node.js server
 └── run.sh              # Startup script
 ```
 
@@ -75,17 +70,20 @@ QuickHire/
 - **Test Dashboard:** `/test-dashboard.html` (contains all UI components)
 - **Login Page:** `/login.html`
 
-## Development Notes
+## Development Information
 
-- The Java servlets currently have compilation issues that need to be resolved
-- The Node.js server uses in-memory storage when database connections are unavailable
-- For frontend development, use the test-dashboard.html page which contains all styled UI components
+This project was developed from scratch using the following development tools:
+- Visual Studio Code for code editing
+- Node.js for server-side JavaScript
+- Java Development Kit (JDK) for backend services
+- Git for version control
+- Chrome DevTools for frontend debugging
 
-## Visually Improved Elements
+## UI Design Features
 
-The latest update focused on UI enhancements including:
+The UI design incorporates modern web design principles:
 - Gradient buttons with hover animations
-- Modern form inputs with floating labels
+- Material Design-inspired form inputs with floating labels
 - Enhanced job cards with subtle animations
 - Improved notification system with titles and icons
 - Styled tabs with interactive elements

@@ -32,7 +32,7 @@ const MIME_TYPES = {
   '.txt': 'text/plain',
 };
 
-// In-memory storage for demo data
+// In-memory storage for demo data (used when database is not available)
 const users = [
   {
     id: "12345",
@@ -84,6 +84,64 @@ const server = http.createServer((req, res) => {
       } catch (error) {
         res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: false, message: 'Invalid request' }));
+      }
+    });
+    
+    return;
+  }
+  
+  // Handle login form submission
+  if (pathname === '/login' && req.method === 'POST') {
+    let body = '';
+    
+    req.on('data', chunk => {
+      body += chunk.toString();
+    });
+    
+    req.on('end', () => {
+      try {
+        // Parse the form data
+        const data = JSON.parse(body);
+        console.log('Login form submission:', data);
+        
+        // Very basic authentication
+        const user = users.find(u => u.email === data.email);
+        
+        if (user) {
+          // Redirect to the appropriate dashboard based on user type
+          const redirectUrl = user.userType === 'client' 
+            ? 'client-dashboard-dynamic.html' 
+            : 'freelancer-dashboard-dynamic.html';
+            
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ 
+            success: true, 
+            redirect: redirectUrl,
+            user: {
+              id: user.id,
+              username: user.username,
+              fullName: user.fullName,
+              email: user.email,
+              userType: user.userType,
+              company: user.company,
+              location: user.location,
+              profileImage: user.profileImage
+            }
+          }));
+        } else {
+          // Failed login
+          res.writeHead(401, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ 
+            success: false, 
+            message: 'Invalid email or password' 
+          }));
+        }
+      } catch (error) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ 
+          success: false, 
+          message: 'Invalid request format' 
+        }));
       }
     });
     
