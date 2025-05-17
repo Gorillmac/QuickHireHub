@@ -29,21 +29,6 @@ QuickHire is a comprehensive freelance job matching platform that allows:
  
 5. Open your browser and go to: http://localhost:5000/test-dashboard.html
 
-## Project Structure
-
-```
-QuickHire/
-├── src/
-│   └── main/
-│       ├── java/        # Java backend code
-│       └── webapp/      # Frontend assets
-│           ├── css/     # Stylesheets
-│           ├── js/      # JavaScript files
-│           └── *.html   # HTML pages
-├── server.js           # Node.js server
-└── run.sh              # Startup script
-```
-
 ## Key Features
 
 ### UI Components
@@ -60,13 +45,6 @@ QuickHire/
 - Search and filter functionality
 - Real-time messaging
 - Profile management
-
-## Demo Pages
-
-- **Client Dashboard:** `/client-dashboard-dynamic.html`
-- **Freelancer Dashboard:** `/freelancer-dashboard-dynamic.html`
-- **Test Dashboard:** `/test-dashboard.html` (contains all UI components)
-- **Login Page:** `/login.html`
 
 ## Development Information
 
