@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickHire Dashboard Test</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css">
+    <script>
+        // Create a demo user when the page loads
+        window.addEventListener('DOMContentLoaded', function() {
+            const mockUser = {
+                id: "12345",
+                username: "test_user",
+                fullName: "Test User",
+                email: "test@example.com", 
+                userType: "client",
+                company: "Test Company",
+                location: "Cape Town, South Africa",
+                profileImage: "https://randomuser.me/api/portraits/men/32.jpg"
+            };
+            
+            // Store mock user data
+            localStorage.setItem('currentUser', JSON.stringify(mockUser));
+            
+            // Initialize dashboard elements
+            updateUserInfo();
+            setupEventListeners();
+            
+            // Show a demo notification
+            setTimeout(() => {
+                showNotification("Welcome to the QuickHire dashboard!", "info", "Dashboard Loaded");
+            }, 1000);
+        });
+        
+        // Update user information
+        function updateUserInfo() {
+            const user = JSON.parse(localStorage.getItem('currentUser'));
+            if (!user) return;
+            
+            // Update user info in the UI
+            document.querySelector('.profile-name').textContent = user.fullName;
+            document.querySelector('.user-type').textContent = user.userType === 'client' ? 'Client' : 'Freelancer';
+            document.querySelector('.welcome-message').textContent = `Welcome, ${user.fullName.split(' ')[0]}!`;
+            
+            // Show content based on user type
+            if (user.userType === 'client') {
+                document.querySelectorAll('.client-only').forEach(el => el.style.display = 'block');
+                document.querySelectorAll('.freelancer-only').forEach(el => el.style.display = 'none');
+            } else {
+                document.querySelectorAll('.freelancer-only').forEach(el => el.style.display = 'block');
+                document.querySelectorAll('.client-only').forEach(el => el.style.display = 'none');
+            }
+        }
+        
+        // Show notification
+        function showNotification(message, type = 'info', title = '') {
+            // Create notification elements
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            
+            // Create icon based on type
+            const iconSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            iconSvg.setAttribute('viewBox', '0 0 24 24');
+            iconSvg.setAttribute('fill', 'none');
+            iconSvg.setAttribute('stroke', 'currentColor');
+            iconSvg.setAttribute('stroke-width', '2');
+            iconSvg.setAttribute('stroke-linecap', 'round');
+            iconSvg.setAttribute('stroke-linejoin', 'round');
+            
+            let iconPath = '';
+            
+            if (type === 'success') {
+                iconPath = '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><path d="M22 4L12 14.01l-3-3"></path>';
+                if (!title) title = 'Success';
+            } else if (type === 'error') {
+                iconPath = '<circle cx="12" cy="12" r="10"></circle><path d="M15 9l-6 6"></path><path d="M9 9l6 6"></path>';
+                if (!title) title = 'Error';
+            } else {
+                iconPath = '<circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path>';
+                if (!title) title = 'Information';
+            }
+            
+            iconSvg.innerHTML = iconPath;
+            
+            const iconContainer = document.createElement('div');
+            iconContainer.className = 'notification-icon';
+            iconContainer.appendChild(iconSvg);
+            
+            // Create content container
+            const content = document.createElement('div');
+            content.className = 'notification-content';
+            
+            // Add title if provided
+            const titleEl = document.createElement('div');
+            titleEl.className = 'notification-title';
+            titleEl.textContent = title;
+            content.appendChild(titleEl);
+            
+            // Add message
+            const messageEl = document.createElement('div');
+            messageEl.className = 'notification-message';
+            messageEl.textContent = message;
+            content.appendChild(messageEl);
+            
+            // Create close button
+            const closeBtn = document.createElement('div');
+            closeBtn.className = 'notification-close';
+            closeBtn.innerHTML = '&times;';
+            closeBtn.addEventListener('click', () => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        document.body.removeChild(notification);
+                    }
+                }, 400);
+            });
+            
+            // Assemble notification
+            notification.appendChild(iconContainer);
+            notification.appendChild(content);
+            notification.appendChild(closeBtn);
+            
+            // Append to body
+            document.body.appendChild(notification);
+            
+            // Show notification
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+            
+            // Hide and remove after 4 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            document.body.removeChild(notification);
+                        }
+                    }, 400);
+                }
+            }, 4000);
+        }
+        
+        // Set up event listeners
+        function setupEventListeners() {
+            // Show new job form
+            document.getElementById('new-job-btn').addEventListener('click', function() {
+                document.getElementById('new-job-modal').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('new-job-modal').classList.add('show');
+                }, 10);
+            });
+            
+            // Close modal on X button click
+            document.querySelectorAll('.close').forEach(el => {
+                el.addEventListener('click', function() {
+                    this.closest('.modal').classList.remove('show');
+                    setTimeout(() => {
+                        this.closest('.modal').style.display = 'none';
+                    }, 300);
+                });
+            });
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', function(e) {
+                document.querySelectorAll('.modal').forEach(modal => {
+                    if (e.target === modal) {
+                        modal.classList.remove('show');
+                        setTimeout(() => {
+                            modal.style.display = 'none';
+                        }, 300);
+                    }
+                });
+            });
+            
+            // Form submission
+            document.getElementById('new-job-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                showNotification('Job posted successfully!', 'success');
+                this.closest('.modal').classList.remove('show');
+                setTimeout(() => {
+                    this.closest('.modal').style.display = 'none';
+                }, 300);
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="user-profile">
+                <div class="user-avatar">TU</div>
+                <h3 class="profile-name">Test User</h3>
+                <div class="user-type">Client</div>
+                <p class="user-location"><i class='bx bx-map'></i>Cape Town, South Africa</p>
+            </div>
+            
+            <ul class="nav-menu">
+                <li><a href="#" class="active"><i class='bx bxs-dashboard'></i>Dashboard</a></li>
+                <li><a href="#"><i class='bx bx-briefcase'></i>My Jobs</a></li>
+                <li><a href="#"><i class='bx bx-user'></i>My Profile</a></li>
+                <li><a href="#"><i class='bx bx-message-square-detail'></i>Messages</a></li>
+                <li><a href="#"><i class='bx bx-cog'></i>Settings</a></li>
+                <li><a href="#"><i class='bx bx-help-circle'></i>Help</a></li>
+                <li><a href="#"><i class='bx bx-log-out'></i>Logout</a></li>
+            </ul>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Dashboard Header -->
+            <div class="dashboard-header">
+                <h1 class="welcome-message">Welcome, Test!</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" id="new-job-btn">
+                        <i class='bx bx-plus'></i><span>Post a Job</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Dashboard Widgets -->
+            <div class="dashboard-widgets">
+                <div class="widget">
+                    <div class="widget-header">
+                        <h3 class="widget-title">ACTIVE JOBS</h3>
+                        <div class="widget-icon bg-primary">
+                            <i class='bx bx-briefcase'></i>
+                        </div>
+                    </div>
+                    <div class="widget-value">5</div>
+                    <div class="widget-description">Currently active jobs</div>
+                </div>
+                
+                <div class="widget">
+                    <div class="widget-header">
+                        <h3 class="widget-title">APPLICATIONS</h3>
+                        <div class="widget-icon bg-success">
+                            <i class='bx bx-user-check'></i>
+                        </div>
+                    </div>
+                    <div class="widget-value">12</div>
+                    <div class="widget-description">Total applications received</div>
+                </div>
+                
+                <div class="widget">
+                    <div class="widget-header">
+                        <h3 class="widget-title">COMPLETED</h3>
+                        <div class="widget-icon bg-warning">
+                            <i class='bx bx-check-circle'></i>
+                        </div>
+                    </div>
+                    <div class="widget-value">8</div>
+                    <div class="widget-description">Jobs completed</div>
+                </div>
+            </div>
+            
+            <!-- Tabs for different job categories -->
+            <div class="tabs">
+                <div class="tab active"><i class='bx bx-briefcase'></i>Active Jobs</div>
+                <div class="tab"><i class='bx bx-time'></i>In Progress</div>
+                <div class="tab"><i class='bx bx-check-circle'></i>Completed</div>
+            </div>
+            
+            <!-- Job List Section -->
+            <div class="section">
+                <div class="job-list-header">
+                    <h2 class="job-list-title">Active Jobs</h2>
+                    <div class="job-list-actions">
+                        <div class="job-filter">
+                            <select class="form-select">
+                                <option>All Jobs</option>
+                                <option>Open</option>
+                                <option>In Progress</option>
+                                <option>Completed</option>
+                            </select>
+                        </div>
+                        <div class="search-input-container">
+                            <i class='bx bx-search search-icon'></i>
+                            <input type="text" class="form-control search-input" placeholder="Search jobs...">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Job List -->
+                <div class="job-list">
+                    <!-- Job Card -->
+                    <div class="job-card">
+                        <div class="job-status open">Open</div>
+                        <h3 class="job-title">Full Stack Developer for E-commerce Website</h3>
+                        <div class="job-budget">15,000</div>
+                        <div class="job-location"><i class='bx bx-map'></i>Remote</div>
+                        <div class="job-date"><i class='bx bx-calendar'></i>Posted 3 days ago</div>
+                        <p class="job-description">Looking for an experienced developer to build a responsive e-commerce website with product catalog, user accounts, and secure payment integration.</p>
+                        <div class="job-skills">
+                            <span class="skill-tag">React</span>
+                            <span class="skill-tag">Node.js</span>
+                            <span class="skill-tag">MongoDB</span>
+                        </div>
+                        <div class="job-actions">
+                            <button class="btn btn-outline-primary"><i class='bx bx-edit'></i>Edit</button>
+                            <button class="btn btn-primary"><i class='bx bx-user'></i>View Applications</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Job Card -->
+                    <div class="job-card">
+                        <div class="job-status open">Open</div>
+                        <h3 class="job-title">UI/UX Designer for Mobile App</h3>
+                        <div class="job-budget">8,500</div>
+                        <div class="job-location"><i class='bx bx-map'></i>Cape Town</div>
+                        <div class="job-date"><i class='bx bx-calendar'></i>Posted 5 days ago</div>
+                        <p class="job-description">Need a talented UI/UX designer to create intuitive and engaging interfaces for our fitness tracking mobile application.</p>
+                        <div class="job-skills">
+                            <span class="skill-tag">Figma</span>
+                            <span class="skill-tag">UI Design</span>
+                            <span class="skill-tag">Mobile</span>
+                        </div>
+                        <div class="job-actions">
+                            <button class="btn btn-outline-primary"><i class='bx bx-edit'></i>Edit</button>
+                            <button class="btn btn-primary"><i class='bx bx-user'></i>View Applications</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Job Card -->
+                    <div class="job-card">
+                        <div class="job-status in-progress">In Progress</div>
+                        <h3 class="job-title">Content Writer for Business Blog</h3>
+                        <div class="job-budget">5,000</div>
+                        <div class="job-location"><i class='bx bx-map'></i>Johannesburg</div>
+                        <div class="job-date"><i class='bx bx-calendar'></i>Posted 1 week ago</div>
+                        <p class="job-description">Seeking a professional content writer to create engaging blog posts focused on business growth strategies and market trends.</p>
+                        <div class="job-skills">
+                            <span class="skill-tag">Content Writing</span>
+                            <span class="skill-tag">SEO</span>
+                            <span class="skill-tag">Marketing</span>
+                        </div>
+                        <div class="job-actions">
+                            <button class="btn btn-tertiary"><i class='bx bx-message-square-detail'></i>Message</button>
+                            <button class="btn btn-success"><i class='bx bx-check-circle'></i>Complete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- New Job Modal -->
+    <div id="new-job-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Post a New Job</h2>
+            <form id="new-job-form">
+                <div class="form-group form-floating">
+                    <input type="text" id="job-title" placeholder="Job Title">
+                    <label for="job-title">Job Title</label>
+                </div>
+                
+                <div class="form-group form-floating">
+                    <textarea id="job-description" placeholder="Job Description"></textarea>
+                    <label for="job-description">Job Description</label>
+                </div>
+                
+                <div class="form-group form-floating">
+                    <input type="number" id="job-budget" placeholder="Budget (ZAR)">
+                    <label for="job-budget">Budget (ZAR)</label>
+                </div>
+                
+                <div class="form-group form-floating">
+                    <input type="text" id="job-location" placeholder="Location">
+                    <label for="job-location">Location</label>
+                    <div class="form-feedback">Enter a city or "Remote"</div>
+                </div>
+                
+                <div class="form-group form-floating">
+                    <input type="text" id="job-skills" placeholder="Required Skills">
+                    <label for="job-skills">Required Skills</label>
+                    <div class="form-feedback">Separate skills with commas</div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-tertiary close">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Post Job</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

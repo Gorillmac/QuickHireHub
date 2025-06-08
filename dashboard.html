@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Dashboard - QuickHire</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-container">
+            <a href="index.html" class="logo"><i class="fas fa-bolt"></i> QuickHire</a>
+            
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="#">Find Talent</a>
+                <a href="#">Messages</a>
+            </div>
+            
+            <div class="user-menu">
+                <button class="user-button" id="userMenuButton">
+                    <img src="https://ui-avatars.com/api/?background=4361ee&color=fff" alt="User Avatar" id="user-avatar">
+                    <span id="profile-name">Loading...</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                
+                <div class="dropdown-menu" id="userDropdown">
+                    <a href="client-dashboard-dynamic.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    <a href="#"><i class="fas fa-user"></i> Profile</a>
+                    <a href="#"><i class="fas fa-briefcase"></i> My Jobs</a>
+                    <a href="#"><i class="fas fa-cog"></i> Settings</a>
+                    <hr>
+                    <button id="logout-btn"><i class="fas fa-sign-out-alt"></i> Log Out</button>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Dashboard -->
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h3 class="profile-name" id="profile-name">Loading...</h3>
+                <p class="user-type">Client</p>
+            </div>
+            
+            <ul class="nav-menu">
+                <li><a href="#" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="#"><i class="fas fa-briefcase"></i> My Jobs</a></li>
+                <li><a href="#"><i class="fas fa-file-contract"></i> Contracts</a></li>
+                <li><a href="#"><i class="fas fa-money-bill-wave"></i> Payments</a></li>
+                <li><a href="#"><i class="fas fa-comment"></i> Messages</a></li>
+                <li><a href="#"><i class="fas fa-star"></i> Reviews</a></li>
+                <li><a href="#"><i class="fas fa-user"></i> Profile</a></li>
+                <li><a href="#"><i class="fas fa-cog"></i> Settings</a></li>
+            </ul>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="dashboard-header">
+                <h1 class="welcome-message" id="welcome-message">Welcome back!</h1>
+                <div class="header-actions">
+                    <button id="new-job-btn" class="btn btn-primary"><i class="fas fa-plus"></i> Post a New Job</button>
+                </div>
+            </div>
+            
+            <!-- Search Bar -->
+            <div class="search-bar">
+                <form id="search-form" class="search-form">
+                    <input type="text" id="search-input" class="search-input" placeholder="Search your jobs...">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </form>
+            </div>
+            
+            <!-- Summary Widgets -->
+            <div class="dashboard-widgets">
+                <div class="widget">
+                    <div class="widget-header">
+                        <h3 class="widget-title">Active Jobs</h3>
+                        <div class="widget-icon bg-primary">
+                            <i class="fas fa-briefcase"></i>
+                        </div>
+                    </div>
+                    <div class="widget-value" id="active-jobs-count">0</div>
+                    <div class="widget-description">Currently active job postings</div>
+                </div>
+                
+                <div class="widget">
+                    <div class="widget-header">
+                        <h3 class="widget-title">Applications</h3>
+                        <div class="widget-icon bg-success">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                    </div>
+                    <div class="widget-value" id="applications-count">0</div>
+                    <div class="widget-description">Freelancer applications received</div>
+                </div>
+                
+                <div class="widget">
+                    <div class="widget-header">
+                        <h3 class="widget-title">Completed Jobs</h3>
+                        <div class="widget-icon bg-warning">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                    <div class="widget-value" id="completed-jobs-count">0</div>
+                    <div class="widget-description">Successfully completed projects</div>
+                </div>
+            </div>
+            
+            <!-- Recent Activity -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Recent Activity</h2>
+                </div>
+                <div class="activity-timeline" id="activity-timeline">
+                    <div class="empty-state">No recent activity to display.</div>
+                </div>
+            </div>
+            
+            <!-- My Jobs Section -->
+            <div class="section">
+                <div class="job-list-header">
+                    <h2 class="job-list-title">My Jobs</h2>
+                </div>
+                <div id="job-list" class="job-list">
+                    <!-- Job cards will be dynamically inserted here -->
+                    <div class="empty-state">Loading your jobs...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="js/dashboard.js"></script>
+    <script>
+        // Toggle user dropdown menu
+        document.getElementById('userMenuButton').addEventListener('click', function() {
+            document.getElementById('userDropdown').classList.toggle('show');
+        });
+        
+        // Close dropdown when clicking outside
+        window.addEventListener('click', function(event) {
+            if (!event.target.matches('.user-button') && !event.target.closest('.user-button')) {
+                const dropdown = document.getElementById('userDropdown');
+                if (dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                }
+            }
+        });
+        
+        // Update Widget Counts from API Data
+        function updateWidgetCounts(jobs) {
+            if (!jobs) return;
+            
+            const activeJobs = jobs.filter(job => job.status === 'OPEN' || job.status === 'IN_PROGRESS');
+            const completedJobs = jobs.filter(job => job.status === 'COMPLETED');
+            
+            document.getElementById('active-jobs-count').textContent = activeJobs.length;
+            document.getElementById('completed-jobs-count').textContent = completedJobs.length;
+            // Applications count would come from a different API endpoint in a real implementation
+        }
+        
+        // Listen for job data updates
+        document.addEventListener('jobsLoaded', function(e) {
+            updateWidgetCounts(e.detail.jobs);
+        });
+    </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Dashboard - QuickHire</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-container">
+            <a href="index.html" class="logo"><i class="fas fa-bolt"></i> QuickHire</a>
+            
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="#">Find Talent</a>
+                <a href="#">Messages</a>
+            </div>
+            
+            <div class="user-menu">
+                <button class="user-button" id="userMenuButton">
+                    <img src="https://ui-avatars.com/api/?background=4361ee&color=fff" alt="User Avatar" id="user-avatar">
+                    <span id="profile-name">Loading...</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                
+                <div class="dropdown-menu" id="userDropdown">
+                    <a href="client-dashboard-dynamic.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    <a href="#"><i class="fas fa-user"></i> Profile</a>
+                    <a href="#"><i class="fas fa-briefcase"></i> My Jobs</a>
+                    <a href="#"><i class="fas fa-cog"></i> Settings</a>
+                    <hr>
+                    <button id="logout-btn"><i class="fas fa-sign-out-alt"></i> Log Out</button>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Dashboard -->
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h3 class="profile-name" id="profile-name">Loading...</h3>
+                <p class="user-type">Client</p>
+            </div>
+            
+            <ul class="nav-menu">
+                <li><a href="#" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="#"><i class="fas fa-briefcase"></i> My Jobs</a></li>
+                <li><a href="#"><i class="fas fa-file-contract"></i> Contracts</a></li>
+                <li><a href="#"><i class="fas fa-money-bill-wave"></i> Payments</a></li>
+                <li><a href="#"><i class="fas fa-comment"></i> Messages</a></li>
+                <li><a href="#"><i class="fas fa-star"></i> Reviews</a></li>
+                <li><a href="#"><i class="fas fa-user"></i> Profile</a></li>
+                <li><a href="#"><i class="fas fa-cog"></i> Settings</a></li>
+            </ul>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="dashboard-header">
+                <h1 class="welcome-message" id="welcome-message">Welcome back!</h1>
+                <div class="header-actions">
+                    <button id="new-job-btn" class="btn btn-primary"><i class="fas fa-plus"></i> Post a New Job</button>
+                </div>
+            </div>
+            
+            <!-- Search Bar -->
+            <div class="search-bar">
+                <form id="search-form" class="search-form">
+                    <input type="text" id="search-input" class="search-input" placeholder="Search your jobs...">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </form>
+            </div>
+            
+            <!-- Summary Widgets -->
+            <div class="dashboard-widgets">
+                <div class="widget">
+                    <div class="widget-header">
+                        <h3 class="widget-title">Active Jobs</h3>
+                        <div class="widget-icon bg-primary">
+                            <i class="fas fa-briefcase"></i>
+                        </div>
+                    </div>
+                    <div class="widget-value" id="active-jobs-count">0</div>
+                    <div class="widget-description">Currently active job postings</div>
+                </div>
+                
+                <div class="widget">
+                    <div class="widget-header">
+                        <h3 class="widget-title">Applications</h3>
+                        <div class="widget-icon bg-success">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                    </div>
+                    <div class="widget-value" id="applications-count">0</div>
+                    <div class="widget-description">Freelancer applications received</div>
+                </div>
+                
+                <div class="widget">
+                    <div class="widget-header">
+                        <h3 class="widget-title">Completed Jobs</h3>
+                        <div class="widget-icon bg-warning">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                    <div class="widget-value" id="completed-jobs-count">0</div>
+                    <div class="widget-description">Successfully completed projects</div>
+                </div>
+            </div>
+            
+            <!-- Recent Activity -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Recent Activity</h2>
+                </div>
+                <div class="activity-timeline" id="activity-timeline">
+                    <div class="empty-state">No recent activity to display.</div>
+                </div>
+            </div>
+            
+            <!-- My Jobs Section -->
+            <div class="section">
+                <div class="job-list-header">
+                    <h2 class="job-list-title">My Jobs</h2>
+                </div>
+                <div id="job-list" class="job-list">
+                    <!-- Job cards will be dynamically inserted here -->
+                    <div class="empty-state">Loading your jobs...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="js/dashboard.js"></script>
+    <script>
+        // Toggle user dropdown menu
+        document.getElementById('userMenuButton').addEventListener('click', function() {
+            document.getElementById('userDropdown').classList.toggle('show');
+        });
+        
+        // Close dropdown when clicking outside
+        window.addEventListener('click', function(event) {
+            if (!event.target.matches('.user-button') && !event.target.closest('.user-button')) {
+                const dropdown = document.getElementById('userDropdown');
+                if (dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                }
+            }
+        });
+        
+        // Update Widget Counts from API Data
+        function updateWidgetCounts(jobs) {
+            if (!jobs) return;
+            
+            const activeJobs = jobs.filter(job => job.status === 'OPEN' || job.status === 'IN_PROGRESS');
+            const completedJobs = jobs.filter(job => job.status === 'COMPLETED');
+            
+            document.getElementById('active-jobs-count').textContent = activeJobs.length;
+            document.getElementById('completed-jobs-count').textContent = completedJobs.length;
+            // Applications count would come from a different API endpoint in a real implementation
+        }
+        
+        // Listen for job data updates
+        document.addEventListener('jobsLoaded', function(e) {
+            updateWidgetCounts(e.detail.jobs);
+        });
+    </script>
+</body>
+</html>
